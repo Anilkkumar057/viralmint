@@ -389,6 +389,7 @@ export default function Home() {
 
     if (!currentIdea.trim()) return;
 
+    setIdea(currentIdea);
 
     if (user && plan === "free" && generationCount >= FREE_LIMIT) {
       triggerProBanner();
