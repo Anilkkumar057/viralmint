@@ -117,11 +117,12 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-10 flex flex-col items-center">
-              <img
-                src="/upi-qr.png"
-                alt="UPI QR"
-                className="w-56 rounded-[2rem] border border-black/10"
-              />
+              <Link
+                  href="/pricing"
+                 className="mt-10 inline-flex rounded-full bg-black px-8 py-4 text-xs uppercase tracking-[0.3em] text-white transition-all duration-500 hover:scale-[1.03]"
+                 >
+                View Plans
+                </Link>
 
               <p className="mt-5 text-xs uppercase tracking-[0.3em] text-black/40">
                 Scan & Upgrade
