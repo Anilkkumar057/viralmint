@@ -1,6 +1,39 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "../lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 export default function LandingPage() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const start = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+
+    start();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/studio`,
+      },
+    });
+  };
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#fffaf2] text-black">
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
@@ -15,12 +48,21 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <Link
-            href="/studio"
-            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
-          >
-            Enter Studio
-          </Link>
+          {user ? (
+            <Link
+              href="/studio"
+              className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+            >
+              Enter Studio
+            </Link>
+          ) : (
+            <button
+              onClick={signInWithGoogle}
+              className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+            >
+              Continue with Google
+            </button>
+          )}
         </header>
 
         <section className="flex flex-1 flex-col items-center justify-center py-20 text-center">
@@ -42,16 +84,28 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/studio"
-              className="rounded-full bg-black px-8 py-4 text-sm tracking-[0.25em] text-white transition-all duration-500 hover:scale-[1.03]"
-            >
-              ENTER STUDIO
-            </Link>
+            {user ? (
+              <Link
+                href="/studio"
+                className="rounded-full bg-black px-8 py-4 text-sm tracking-[0.25em] text-white transition-all duration-500 hover:scale-[1.03]"
+              >
+                ENTER STUDIO
+              </Link>
+            ) : (
+              <button
+                onClick={signInWithGoogle}
+                className="rounded-full bg-black px-8 py-4 text-sm tracking-[0.25em] text-white transition-all duration-500 hover:scale-[1.03]"
+              >
+                CONTINUE WITH GOOGLE
+              </button>
+            )}
 
-            <div className="rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.25em] text-black/45">
-              Creator-first AI Engine
-            </div>
+            <Link
+              href="/pricing"
+              className="rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500 hover:bg-black hover:text-white"
+            >
+              View Plans
+            </Link>
           </div>
 
           <div className="mt-24 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
@@ -116,18 +170,12 @@ export default function LandingPage() {
               advanced creator intelligence.
             </p>
 
-            <div className="mt-10 flex flex-col items-center">
-              <Link
-                  href="/pricing"
-                 className="mt-10 inline-flex rounded-full bg-black px-8 py-4 text-xs uppercase tracking-[0.3em] text-white transition-all duration-500 hover:scale-[1.03]"
-                 >
-                View Plans
-                </Link>
-
-              <p className="mt-5 text-xs uppercase tracking-[0.3em] text-black/40">
-                Scan & Upgrade
-              </p>
-            </div>
+            <Link
+              href="/pricing"
+              className="mt-10 inline-flex rounded-full bg-black px-8 py-4 text-xs uppercase tracking-[0.3em] text-white transition-all duration-500 hover:scale-[1.03]"
+            >
+              View Plans
+            </Link>
           </div>
         </section>
       </div>
