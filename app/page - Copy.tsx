@@ -41,7 +41,6 @@ const FREE_LIMIT = 10;
 export default function Home() {
   const [idea, setIdea] = useState("");
   const ideaRef = useRef<HTMLTextAreaElement | null>(null);
-
   const [result, setResult] = useState<ResultState>(emptyResult);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [momentumTags, setMomentumTags] = useState<string[]>([]);
@@ -185,6 +184,7 @@ export default function Home() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
+
     setGenerationCount(nextCount);
 
     await supabase
@@ -278,8 +278,6 @@ export default function Home() {
   const saveSingleOutput = async (section: keyof ResultState, text: string) => {
     if (!user) return;
 
-    const currentIdea = ideaRef.current?.value || idea;
-
     const singleResult: ResultState = {
       hooks: section === "hooks" ? [text] : [],
       titles: section === "titles" ? [text] : [],
@@ -289,7 +287,7 @@ export default function Home() {
     };
 
     await saveGeneration(
-      `Saved ${section}: ${currentIdea || "Viral Mint output"}`,
+      `Saved ${section}: ${idea || "Viral Mint output"}`,
       singleResult
     );
 
@@ -345,10 +343,6 @@ export default function Home() {
   const useVaultItem = (item: VaultItem) => {
     setIdea(item.prompt);
 
-    if (ideaRef.current) {
-      ideaRef.current.value = item.prompt;
-    }
-
     try {
       setResult(JSON.parse(item.result));
     } catch {
@@ -385,11 +379,7 @@ export default function Home() {
   };
 
   const generateHooks = async () => {
-    const currentIdea = ideaRef.current?.value || "";
-
-    if (!currentIdea.trim()) return;
-
-    setIdea(currentIdea);
+    if (!idea.trim()) return;
 
     if (user && plan === "free" && generationCount >= FREE_LIMIT) {
       triggerProBanner();
@@ -407,7 +397,7 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: currentIdea,
+          prompt: idea,
           language: "Hinglish",
           platform: profile?.main_platform || "Instagram",
           tone: profile?.creator_style || "Emotional",
@@ -430,8 +420,8 @@ export default function Home() {
       setResult(structuredResult);
       generateMomentumTags();
 
-      await saveGeneration(currentIdea, structuredResult);
-      await saveMemory(`${creatorName} explored idea: ${currentIdea}`);
+      await saveGeneration(idea, structuredResult);
+      await saveMemory(`${creatorName} explored idea: ${idea}`);
       await incrementUsage();
     } catch {
       const fallback: ResultState = {
@@ -444,7 +434,7 @@ export default function Home() {
 
       setResult(fallback);
       generateMomentumTags();
-      await saveGeneration(currentIdea, fallback);
+      await saveGeneration(idea, fallback);
       await incrementUsage();
     }
 
@@ -834,8 +824,9 @@ ${result.titles.join("\n")}
 
           <div className="mt-10 w-full max-w-2xl">
             <textarea
-              ref={ideaRef}
-              defaultValue={idea}
+            autoFocus
+                ref={ideaRef}
+                defaultValue={idea}
               placeholder="fitness tips for people who always restart on Monday..."
               className="min-h-36 w-full resize-none rounded-[2rem] border border-black/10 bg-white/60 p-6 text-base outline-none"
             />
