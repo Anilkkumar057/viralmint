@@ -1,8 +1,9 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import IdeaBox from "@/components/IdeaBox";
 
 type CreatorProfile = {
   id?: string;
@@ -37,23 +38,8 @@ const emptyResult: ResultState = {
 };
 
 const FREE_LIMIT = 10;
-const IdeaBox = memo(function IdeaBox({
-  ideaRef,
-}: {
-  ideaRef: React.RefObject<HTMLTextAreaElement | null>;
-}) {
-  return (
-    <textarea
-      ref={ideaRef}
-      placeholder="fitness tips for people who always restart on Monday..."
-      className="min-h-36 w-full resize-none rounded-[2rem] border border-black/10 bg-white/60 p-6 text-base outline-none"
-    />
-  );
-});
-export default function Home() {
-  const [idea, setIdea] = useState("");
-  const ideaRef = useRef<HTMLTextAreaElement | null>(null);
 
+export default function Home() {
   const [result, setResult] = useState<ResultState>(emptyResult);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [momentumTags, setMomentumTags] = useState<string[]>([]);
@@ -131,6 +117,24 @@ export default function Home() {
     };
   }, []);
 
+  const getCurrentIdea = () => {
+    const box = document.getElementById(
+      "viral-mint-idea-box"
+    ) as HTMLTextAreaElement | null;
+
+    return box?.value || "";
+  };
+
+  const setIdeaBoxValue = (value: string) => {
+    const box = document.getElementById(
+      "viral-mint-idea-box"
+    ) as HTMLTextAreaElement | null;
+
+    if (box) {
+      box.value = value;
+    }
+  };
+
   const loadProfile = async (userId: string) => {
     const { data } = await supabase
       .from("creator_profiles")
@@ -201,9 +205,7 @@ export default function Home() {
 
     await supabase
       .from("usage_limits")
-      .update({
-        generation_count: nextCount,
-      })
+      .update({ generation_count: nextCount })
       .eq("user_id", user.id);
   };
 
@@ -290,7 +292,7 @@ export default function Home() {
   const saveSingleOutput = async (section: keyof ResultState, text: string) => {
     if (!user) return;
 
-    const currentIdea = ideaRef.current?.value || idea;
+    const currentIdea = getCurrentIdea();
 
     const singleResult: ResultState = {
       hooks: section === "hooks" ? [text] : [],
@@ -355,11 +357,7 @@ export default function Home() {
   };
 
   const useVaultItem = (item: VaultItem) => {
-    setIdea(item.prompt);
-
-    if (ideaRef.current) {
-      ideaRef.current.value = item.prompt;
-    }
+    setIdeaBoxValue(item.prompt);
 
     try {
       setResult(JSON.parse(item.result));
@@ -397,11 +395,9 @@ export default function Home() {
   };
 
   const generateHooks = async () => {
-    const currentIdea = ideaRef.current?.value || "";
+    const currentIdea = getCurrentIdea();
 
     if (!currentIdea.trim()) return;
-
-    setIdea(currentIdea);
 
     if (user && plan === "free" && generationCount >= FREE_LIMIT) {
       triggerProBanner();
@@ -519,8 +515,13 @@ ${result.titles.join("\n")}
   const IdentityForm = () => (
     <div className="mt-10 space-y-5">
       <input
-        value={onboarding.niche}
-        onChange={(e) => setOnboarding({ ...onboarding, niche: e.target.value })}
+  defaultValue={onboarding.niche}
+  onBlur={(e) =>
+    setOnboarding((prev) => ({
+      ...prev,
+      niche: e.target.value,
+    }))
+  }
         placeholder="fitness, finance, education..."
         className="w-full rounded-full border border-black/10 bg-white/60 px-6 py-4 text-sm outline-none"
       />
@@ -845,9 +846,7 @@ ${result.titles.join("\n")}
           )}
 
           <div className="mt-10 w-full max-w-2xl">
-            <textarea
-              <IdeaBox ideaRef={ideaRef} />
-            />
+            <IdeaBox />
 
             <button
               onClick={generateHooks}
