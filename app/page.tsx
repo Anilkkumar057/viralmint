@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
 
@@ -37,7 +37,19 @@ const emptyResult: ResultState = {
 };
 
 const FREE_LIMIT = 10;
-
+const IdeaBox = memo(function IdeaBox({
+  ideaRef,
+}: {
+  ideaRef: React.RefObject<HTMLTextAreaElement | null>;
+}) {
+  return (
+    <textarea
+      ref={ideaRef}
+      placeholder="fitness tips for people who always restart on Monday..."
+      className="min-h-36 w-full resize-none rounded-[2rem] border border-black/10 bg-white/60 p-6 text-base outline-none"
+    />
+  );
+});
 export default function Home() {
   const [idea, setIdea] = useState("");
   const ideaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -834,10 +846,7 @@ ${result.titles.join("\n")}
 
           <div className="mt-10 w-full max-w-2xl">
             <textarea
-              ref={ideaRef}
-              defaultValue={idea}
-              placeholder="fitness tips for people who always restart on Monday..."
-              className="min-h-36 w-full resize-none rounded-[2rem] border border-black/10 bg-white/60 p-6 text-base outline-none"
+              <IdeaBox ideaRef={ideaRef} />
             />
 
             <button
