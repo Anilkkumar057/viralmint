@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import IdeaBox from "@/components/IdeaBox";
 
 type CreatorProfile = {
   id?: string;
@@ -39,8 +41,9 @@ const emptyResult: ResultState = {
 const FREE_LIMIT = 10;
 
 export default function Home() {
-  const [idea, setIdea] = useState("");
-  const ideaRef = useRef<HTMLTextAreaElement | null>(null);
+  const router = useRouter();
+
+  const [authChecking, setAuthChecking] = useState(true);
   const [result, setResult] = useState<ResultState>(emptyResult);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [momentumTags, setMomentumTags] = useState<string[]>([]);
@@ -80,13 +83,17 @@ export default function Home() {
   useEffect(() => {
     const start = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data.user);
 
-      if (data.user) {
-        loadProfile(data.user.id);
-        loadMemories(data.user.id);
-        loadUsage(data.user.id);
+      if (!data.user) {
+        router.push("/");
+        return;
       }
+
+      setUser(data.user);
+      loadProfile(data.user.id);
+      loadMemories(data.user.id);
+      loadUsage(data.user.id);
+      setAuthChecking(false);
     };
 
     start();
@@ -94,13 +101,10 @@ export default function Home() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         const currentUser = session?.user ?? null;
-        setUser(currentUser);
 
-        if (currentUser) {
-          loadProfile(currentUser.id);
-          loadMemories(currentUser.id);
-          loadUsage(currentUser.id);
-        } else {
+        if (!currentUser) {
+          router.push("/");
+          setUser(null);
           setProfile(null);
           setVaultOpen(false);
           setVaultItems([]);
@@ -109,14 +113,39 @@ export default function Home() {
           setGenerationCount(0);
           setPlan("free");
           setShowProBanner(false);
+          return;
         }
+
+        setUser(currentUser);
+        loadProfile(currentUser.id);
+        loadMemories(currentUser.id);
+        loadUsage(currentUser.id);
+        setAuthChecking(false);
       }
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
+
+  const getCurrentIdea = () => {
+    const box = document.getElementById(
+      "viral-mint-idea-box"
+    ) as HTMLTextAreaElement | null;
+
+    return box?.value || "";
+  };
+
+  const setIdeaBoxValue = (value: string) => {
+    const box = document.getElementById(
+      "viral-mint-idea-box"
+    ) as HTMLTextAreaElement | null;
+
+    if (box) {
+      box.value = value;
+    }
+  };
 
   const loadProfile = async (userId: string) => {
     const { data } = await supabase
@@ -184,14 +213,11 @@ export default function Home() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
-
     setGenerationCount(nextCount);
 
     await supabase
       .from("usage_limits")
-      .update({
-        generation_count: nextCount,
-      })
+      .update({ generation_count: nextCount })
       .eq("user_id", user.id);
   };
 
@@ -203,24 +229,9 @@ export default function Home() {
     }, 5000);
   };
 
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin },
-    });
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setVaultOpen(false);
-    setVaultItems([]);
-    setCreatorMemories([]);
-    setEditingIdentity(false);
-    setGenerationCount(0);
-    setPlan("free");
-    setShowProBanner(false);
+    router.push("/");
   };
 
   const saveProfile = async () => {
@@ -278,6 +289,8 @@ export default function Home() {
   const saveSingleOutput = async (section: keyof ResultState, text: string) => {
     if (!user) return;
 
+    const currentIdea = getCurrentIdea();
+
     const singleResult: ResultState = {
       hooks: section === "hooks" ? [text] : [],
       titles: section === "titles" ? [text] : [],
@@ -287,7 +300,7 @@ export default function Home() {
     };
 
     await saveGeneration(
-      `Saved ${section}: ${idea || "Viral Mint output"}`,
+      `Saved ${section}: ${currentIdea || "Viral Mint output"}`,
       singleResult
     );
 
@@ -341,7 +354,7 @@ export default function Home() {
   };
 
   const useVaultItem = (item: VaultItem) => {
-    setIdea(item.prompt);
+    setIdeaBoxValue(item.prompt);
 
     try {
       setResult(JSON.parse(item.result));
@@ -379,7 +392,9 @@ export default function Home() {
   };
 
   const generateHooks = async () => {
-    if (!idea.trim()) return;
+    const currentIdea = getCurrentIdea();
+
+    if (!currentIdea.trim()) return;
 
     if (user && plan === "free" && generationCount >= FREE_LIMIT) {
       triggerProBanner();
@@ -397,7 +412,7 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: idea,
+          prompt: currentIdea,
           language: "Hinglish",
           platform: profile?.main_platform || "Instagram",
           tone: profile?.creator_style || "Emotional",
@@ -420,8 +435,8 @@ export default function Home() {
       setResult(structuredResult);
       generateMomentumTags();
 
-      await saveGeneration(idea, structuredResult);
-      await saveMemory(`${creatorName} explored idea: ${idea}`);
+      await saveGeneration(currentIdea, structuredResult);
+      await saveMemory(`${creatorName} explored idea: ${currentIdea}`);
       await incrementUsage();
     } catch {
       const fallback: ResultState = {
@@ -434,7 +449,7 @@ export default function Home() {
 
       setResult(fallback);
       generateMomentumTags();
-      await saveGeneration(idea, fallback);
+      await saveGeneration(currentIdea, fallback);
       await incrementUsage();
     }
 
@@ -497,8 +512,13 @@ ${result.titles.join("\n")}
   const IdentityForm = () => (
     <div className="mt-10 space-y-5">
       <input
-        value={onboarding.niche}
-        onChange={(e) => setOnboarding({ ...onboarding, niche: e.target.value })}
+        defaultValue={onboarding.niche}
+        onBlur={(e) =>
+          setOnboarding((prev) => ({
+            ...prev,
+            niche: e.target.value,
+          }))
+        }
         placeholder="fitness, finance, education..."
         className="w-full rounded-full border border-black/10 bg-white/60 px-6 py-4 text-sm outline-none"
       />
@@ -624,6 +644,16 @@ ${result.titles.join("\n")}
     );
   };
 
+  if (authChecking) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#fffaf2] text-black">
+        <p className="text-xs uppercase tracking-[0.35em] text-black/35">
+          Opening Studio...
+        </p>
+      </main>
+    );
+  }
+
   if (user && (!profile || editingIdentity)) {
     return (
       <main className="min-h-screen bg-[#fffaf2] text-black">
@@ -693,21 +723,12 @@ ${result.titles.join("\n")}
               </>
             )}
 
-            {user ? (
-              <button
-                onClick={signOut}
-                className="rounded-full border border-black/10 px-4 py-3 text-xs tracking-wide transition-all duration-500 hover:bg-black hover:text-white sm:px-5 sm:text-sm"
-              >
-                Logout
-              </button>
-            ) : (
-              <button
-                onClick={signInWithGoogle}
-                className="rounded-full border border-black/10 px-4 py-3 text-xs tracking-wide transition-all duration-500 hover:bg-black hover:text-white sm:px-5 sm:text-sm"
-              >
-                Continue with Google
-              </button>
-            )}
+            <button
+              onClick={signOut}
+              className="rounded-full border border-black/10 px-4 py-3 text-xs tracking-wide transition-all duration-500 hover:bg-black hover:text-white sm:px-5 sm:text-sm"
+            >
+              Logout
+            </button>
           </div>
         </header>
 
@@ -804,9 +825,7 @@ ${result.titles.join("\n")}
           </p>
 
           <h2 className="max-w-3xl text-4xl font-light leading-tight tracking-tight md:text-6xl">
-            {user
-              ? `What do you want to create today, ${creatorName}?`
-              : "What do you want to create today?"}
+            What do you want to create today, {creatorName}?
           </h2>
 
           {profile && (
@@ -816,20 +835,14 @@ ${result.titles.join("\n")}
             </p>
           )}
 
-          {user && plan === "free" && (
+          {plan === "free" && (
             <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
               Free plan · {generationCount}/{FREE_LIMIT} generations
             </p>
           )}
 
           <div className="mt-10 w-full max-w-2xl">
-            <textarea
-            autoFocus
-                ref={ideaRef}
-                defaultValue={idea}
-              placeholder="fitness tips for people who always restart on Monday..."
-              className="min-h-36 w-full resize-none rounded-[2rem] border border-black/10 bg-white/60 p-6 text-base outline-none"
-            />
+            <IdeaBox />
 
             <button
               onClick={generateHooks}
