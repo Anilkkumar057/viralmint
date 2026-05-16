@@ -823,6 +823,7 @@ ${result.titles.join("\n")}
 
           <div className="mt-10 w-full max-w-2xl">
             <textarea
+            autoFocus
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               placeholder="fitness tips for people who always restart on Monday..."
