@@ -20,6 +20,13 @@ type VaultItem = {
   created_at: string;
 };
 
+type CreatorProfile = {
+  niche?: string;
+  platform?: string;
+  style?: string;
+  goal?: string;
+};
+
 const emptyResult: ResultState = {
   hooks: [],
   titles: [],
@@ -38,9 +45,10 @@ export default function StudioPage() {
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("Hinglish");
 
+  const [profile, setProfile] = useState<CreatorProfile | null>(null);
   const [result, setResult] = useState<ResultState>(emptyResult);
-  const [generationCount, setGenerationCount] = useState(0);
 
+  const [generationCount, setGenerationCount] = useState(0);
   const [streakCount, setStreakCount] = useState(0);
   const [lastGenerationDate, setLastGenerationDate] = useState("");
 
@@ -61,6 +69,7 @@ export default function StudioPage() {
       setUser(data.user);
       setAuthChecking(false);
 
+      loadProfile(data.user.id);
       loadUsage(data.user.id);
       loadStreak(data.user.id);
     };
@@ -77,6 +86,7 @@ export default function StudioPage() {
         setUser(session.user);
         setAuthChecking(false);
 
+        loadProfile(session.user.id);
         loadUsage(session.user.id);
         loadStreak(session.user.id);
       }
@@ -84,6 +94,26 @@ export default function StudioPage() {
 
     return () => listener.subscription.unsubscribe();
   }, [router]);
+
+  const loadProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("creator_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!data) {
+      router.push("/onboarding");
+      return;
+    }
+
+    setProfile({
+      niche: data.niche || "",
+      platform: data.platform || "",
+      style: data.style || "",
+      goal: data.goal || "",
+    });
+  };
 
   const loadUsage = async (userId: string) => {
     const { data } = await supabase
@@ -111,14 +141,11 @@ export default function StudioPage() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
-
     setGenerationCount(nextCount);
 
     await supabase
       .from("usage_limits")
-      .update({
-        generation_count: nextCount,
-      })
+      .update({ generation_count: nextCount })
       .eq("user_id", user.id);
   };
 
@@ -197,9 +224,7 @@ export default function StudioPage() {
       .order("created_at", { ascending: false })
       .limit(20);
 
-    if (data) {
-      setVaultItems(data as VaultItem[]);
-    }
+    if (data) setVaultItems(data as VaultItem[]);
 
     setVaultOpen(true);
     setVaultLoading(false);
@@ -219,18 +244,14 @@ export default function StudioPage() {
 
   const copyText = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
-
     setCopiedKey(key);
-
-    setTimeout(() => {
-      setCopiedKey("");
-    }, 1200);
+    setTimeout(() => setCopiedKey(""), 1200);
   };
 
   const generateHooks = async () => {
     if (!idea.trim()) return;
 
-    if (generationCount >= 999) {
+    if (generationCount >= 10) {
       router.push("/pricing");
       return;
     }
@@ -246,6 +267,7 @@ export default function StudioPage() {
         body: JSON.stringify({
           prompt: idea,
           language,
+          creatorProfile: profile,
         }),
       });
 
@@ -262,9 +284,7 @@ export default function StudioPage() {
       setResult(generatedResult);
 
       await saveGeneration(idea, generatedResult);
-
       await updateUsage();
-
       await updateStreak();
     } catch (error) {
       console.error(error);
@@ -275,7 +295,6 @@ export default function StudioPage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-
     router.push("/");
   };
 
@@ -327,6 +346,49 @@ export default function StudioPage() {
           </div>
         </header>
 
+        {vaultOpen && (
+          <section className="mt-10 rounded-[2rem] border border-black/10 bg-white/65 p-6 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.35em] text-black/40">
+                Saved Vault
+              </p>
+
+              <button
+                onClick={() => setVaultOpen(false)}
+                className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black"
+              >
+                Close
+              </button>
+            </div>
+
+            {vaultItems.length === 0 ? (
+              <p className="text-sm text-black/50">No saved generations yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {vaultItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white"
+                  >
+                    <button
+                      onClick={() => useVaultItem(item)}
+                      className="w-full text-left"
+                    >
+                      <p className="mb-3 text-xs uppercase tracking-[0.25em] text-black/35">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </p>
+
+                      <p className="text-sm font-medium text-black/70">
+                        {item.prompt}
+                      </p>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         <section className="flex flex-1 flex-col items-center justify-center py-20 text-center">
           <p className="mb-5 text-xs uppercase tracking-[0.4em] text-black/35">
             creator workspace
@@ -344,11 +406,15 @@ export default function StudioPage() {
             Creative Flow · Day {streakCount}
           </p>
 
+          {profile && (
+            <p className="mt-3 text-[10px] uppercase tracking-[0.22em] text-black/35">
+              {profile.niche} · {profile.platform} · {profile.style} ·{" "}
+              {profile.goal}
+            </p>
+          )}
+
           <div className="mt-10 w-full max-w-3xl rounded-[2.5rem] border border-black/10 bg-white/55 p-6 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
-            <LanguageToggle
-              language={language}
-              setLanguage={setLanguage}
-            />
+            <LanguageToggle language={language} setLanguage={setLanguage} />
 
             <textarea
               value={idea}
