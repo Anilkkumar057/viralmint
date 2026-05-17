@@ -3,15 +3,9 @@
 :root {
   --background: #fffaf2;
   --foreground: #111111;
-
   --mint: #7ef2c2;
-  --mint-soft: #dffdf1;
-
   --gold: #f5c76b;
-  --gold-soft: #fff3d6;
-
   --coral: #ff6b5f;
-  --coral-soft: #ffe2df;
 }
 
 html {
@@ -21,27 +15,15 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(126, 242, 194, 0.28), transparent 24%),
-    radial-gradient(circle at 88% 12%, rgba(245, 199, 107, 0.24), transparent 24%),
-    radial-gradient(circle at 50% 95%, rgba(255, 107, 95, 0.12), transparent 28%),
+    radial-gradient(circle at 14% 8%, rgba(126, 242, 194, 0.3), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgba(245, 199, 107, 0.26), transparent 24%),
+    radial-gradient(circle at 50% 96%, rgba(255, 107, 95, 0.12), transparent 30%),
     linear-gradient(135deg, #fffaf2 0%, #fff7e8 45%, #f7fff9 100%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)),
-    radial-gradient(circle at 40% 30%, rgba(255, 255, 255, 0.32), transparent 30%);
-  backdrop-filter: blur(0.5px);
 }
 
 ::selection {
@@ -74,43 +56,4 @@ a {
 button:active,
 a:active {
   transform: scale(0.98);
-}
-
-.premium-card {
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow:
-    0 20px 70px rgba(0, 0, 0, 0.06),
-    0 10px 40px rgba(126, 242, 194, 0.08);
-  backdrop-filter: blur(18px);
-}
-
-.mint-glow {
-  box-shadow:
-    0 12px 38px rgba(126, 242, 194, 0.22),
-    0 0 0 1px rgba(126, 242, 194, 0.18);
-}
-
-.gold-glow {
-  box-shadow:
-    0 14px 45px rgba(245, 199, 107, 0.22),
-    0 0 0 1px rgba(245, 199, 107, 0.16);
-}
-
-@keyframes softPulse {
-  0% {
-    box-shadow: 0 10px 30px rgba(126, 242, 194, 0.16);
-  }
-
-  50% {
-    box-shadow: 0 16px 48px rgba(126, 242, 194, 0.32);
-  }
-
-  100% {
-    box-shadow: 0 10px 30px rgba(126, 242, 194, 0.16);
-  }
-}
-
-.soft-pulse {
-  animation: softPulse 3.8s ease-in-out infinite;
 }

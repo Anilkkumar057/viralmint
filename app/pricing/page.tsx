@@ -102,9 +102,9 @@ export default function PricingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fffaf2] px-6 py-10 text-black">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] px-6 py-10 text-black">
       <div className="mx-auto max-w-7xl">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <header className="flex flex-col gap-6 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.35em] text-black/40">
@@ -113,8 +113,8 @@ export default function PricingPage() {
           </div>
 
           <Link
-            href="/"
-            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+            href="/studio"
+            className="rounded-full border border-black/10 bg-white/65 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
           >
             Back to Studio
           </Link>
@@ -131,16 +131,16 @@ export default function PricingPage() {
 
           <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-black/55">
             Early creator pricing is live. Pick monthly flexibility or annual
-            savings.
+            savings with premium creator momentum.
           </p>
 
-          <div className="mx-auto mt-10 flex w-fit rounded-full border border-black/10 bg-white/70 p-1">
+          <div className="mx-auto mt-10 flex w-fit rounded-full border border-black/10 bg-white/75 p-1 shadow-[0_20px_60px_rgba(126,242,194,0.16)] backdrop-blur-xl">
             <button
               onClick={() => setBilling("monthly")}
               className={
                 billing === "monthly"
-                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white transition-all duration-500"
-                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500"
+                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.26)]"
+                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45"
               }
             >
               Monthly
@@ -150,8 +150,8 @@ export default function PricingPage() {
               onClick={() => setBilling("annual")}
               className={
                 billing === "annual"
-                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white transition-all duration-500"
-                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500"
+                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.26)]"
+                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45"
               }
             >
               Annual Save 33%
@@ -170,12 +170,12 @@ export default function PricingPage() {
                 key={plan.name}
                 className={
                   plan.popular
-                    ? "relative rounded-[2.5rem] border border-black bg-black p-10 text-white shadow-2xl transition-all duration-500"
-                    : "rounded-[2.5rem] border border-black/10 bg-white/60 p-10 backdrop-blur-xl transition-all duration-500"
+                    ? "relative rounded-[2.5rem] border border-black bg-black p-10 text-white shadow-[0_28px_90px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-1"
+                    : "rounded-[2.5rem] border border-black/10 bg-white/65 p-10 shadow-[0_20px_70px_rgba(126,242,194,0.10)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(126,242,194,0.18)]"
                 }
               >
                 {plan.popular && (
-                  <div className="absolute right-6 top-6 rounded-full bg-white px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-black">
+                  <div className="absolute right-6 top-6 rounded-full bg-[#7ef2c2] px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-black shadow-[0_8px_25px_rgba(126,242,194,0.32)]">
                     MOST POPULAR
                   </div>
                 )}
@@ -220,8 +220,8 @@ export default function PricingPage() {
                   <div
                     className={
                       plan.popular
-                        ? "mt-5 rounded-full border border-white/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-white/60"
-                        : "mt-5 rounded-full border border-black/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-black/45"
+                        ? "mt-5 rounded-full border border-[#7ef2c2]/30 bg-[#7ef2c2]/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#7ef2c2]"
+                        : "mt-5 rounded-full border border-[#f5c76b]/35 bg-[#fff3d6] px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c]"
                     }
                   >
                     Save ₹{saving}/year
@@ -253,8 +253,8 @@ export default function PricingPage() {
                   }}
                   className={
                     plan.popular
-                      ? "mt-12 w-full rounded-full bg-white px-6 py-4 text-xs uppercase tracking-[0.3em] text-black transition-all duration-500 hover:scale-[1.02]"
-                      : "mt-12 w-full rounded-full border border-black/10 px-6 py-4 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+                      ? "mt-12 w-full rounded-full bg-white px-6 py-4 text-xs uppercase tracking-[0.3em] text-black shadow-[0_12px_35px_rgba(126,242,194,0.22)] hover:scale-[1.02] hover:bg-[#7ef2c2]"
+                      : "mt-12 w-full rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.3em] hover:bg-black hover:text-white hover:shadow-[0_12px_35px_rgba(126,242,194,0.24)]"
                   }
                 >
                   {billing === "monthly"
@@ -269,7 +269,7 @@ export default function PricingPage() {
         {activePlan && (
           <section
             ref={paymentRef}
-            className="mx-auto mt-24 max-w-5xl rounded-[3rem] border border-black/10 bg-white/70 p-8 backdrop-blur-xl md:p-12"
+            className="mx-auto mt-24 max-w-5xl rounded-[3rem] border border-black/10 bg-white/75 p-8 shadow-[0_25px_85px_rgba(126,242,194,0.16)] backdrop-blur-xl md:p-12"
           >
             <div className="grid gap-10 md:grid-cols-2 md:items-start">
               <div>
@@ -295,7 +295,7 @@ export default function PricingPage() {
                 <img
                   src="/upi-qr.png"
                   alt="UPI QR"
-                  className="mt-8 w-60 rounded-[2rem] border border-black/10"
+                  className="mt-8 w-60 rounded-[2rem] border border-black/10 shadow-[0_18px_60px_rgba(245,199,107,0.22)]"
                 />
 
                 <p className="mt-5 text-xs uppercase tracking-[0.3em] text-black/40">
@@ -304,7 +304,7 @@ export default function PricingPage() {
               </div>
 
               <form
-                className="rounded-[2rem] border border-black/10 bg-[#fffaf2]/70 p-6"
+                className="rounded-[2rem] border border-black/10 bg-[#fffaf2]/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.06)]"
                 onSubmit={submitPaymentQuery}
               >
                 <p className="text-xs uppercase tracking-[0.35em] text-black/35">
@@ -317,7 +317,7 @@ export default function PricingPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email"
-                  className="mt-6 w-full rounded-full border border-black/10 bg-white/70 px-5 py-4 text-sm outline-none"
+                  className="mt-6 w-full rounded-full border border-black/10 bg-white/75 px-5 py-4 text-sm outline-none"
                 />
 
                 <input
@@ -326,26 +326,26 @@ export default function PricingPage() {
                   value={transactionId}
                   onChange={(e) => setTransactionId(e.target.value)}
                   placeholder="Transaction ID / UTR"
-                  className="mt-4 w-full rounded-full border border-black/10 bg-white/70 px-5 py-4 text-sm outline-none"
+                  className="mt-4 w-full rounded-full border border-black/10 bg-white/75 px-5 py-4 text-sm outline-none"
                 />
 
                 <textarea
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Any query or note..."
-                  className="mt-4 min-h-32 w-full resize-none rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm outline-none"
+                  className="mt-4 min-h-32 w-full resize-none rounded-[1.5rem] border border-black/10 bg-white/75 p-5 text-sm outline-none"
                 />
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="mt-6 w-full rounded-full bg-black px-6 py-4 text-xs uppercase tracking-[0.3em] text-white disabled:opacity-50"
+                  className="mt-6 w-full rounded-full bg-black px-6 py-4 text-xs uppercase tracking-[0.3em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(126,242,194,0.36)] disabled:opacity-50"
                 >
                   {submitting ? "Submitting..." : "Submit Query"}
                 </button>
 
                 {success && (
-                  <div className="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+                  <div className="mt-5 rounded-[1.5rem] border border-[#7ef2c2]/40 bg-[#dffdf1] p-4 text-sm text-[#0f5132] shadow-[0_10px_30px_rgba(126,242,194,0.2)]">
                     Payment query submitted successfully. Activation will be
                     processed after verification.
                   </div>
