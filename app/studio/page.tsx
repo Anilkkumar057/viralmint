@@ -98,24 +98,29 @@ export default function StudioPage() {
   }, [router]);
 
   const loadProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("creator_profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from("creator_profiles")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
 
-    if (!data) {
-      router.push("/onboarding");
-      return;
-    }
+  if (error) {
+    console.error("Profile load error:", error);
+    return;
+  }
 
-    setProfile({
-      niche: data.niche || "",
-      platform: data.platform || "",
-      style: data.style || "",
-      goal: data.goal || "",
-    });
-  };
+  if (!data) {
+    router.push("/onboarding");
+    return;
+  }
+
+  setProfile({
+    niche: data.niche || "",
+    platform: data.platform || data.main_platform || "",
+    style: data.style || data.creator_style || "",
+    goal: data.goal || data.emotional_preference || "",
+  });
+};
 
   const loadUsage = async (userId: string) => {
     const { data } = await supabase
