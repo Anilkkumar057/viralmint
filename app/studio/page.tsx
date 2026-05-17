@@ -47,6 +47,8 @@ export default function StudioPage() {
   const [language, setLanguage] = useState("Hinglish");
 
   const [profile, setProfile] = useState<CreatorProfile | null>(null);
+  const [plan, setPlan] = useState("free");
+
   const [result, setResult] = useState<ResultState>(emptyResult);
   const [expanded, setExpanded] = useState<string[]>([]);
 
@@ -76,6 +78,7 @@ export default function StudioPage() {
       loadProfile(data.user.id);
       loadUsage(data.user.id);
       loadStreak(data.user.id);
+      loadPlan(data.user.id, data.user.email || "");
     };
 
     checkUser();
@@ -93,6 +96,7 @@ export default function StudioPage() {
         loadProfile(session.user.id);
         loadUsage(session.user.id);
         loadStreak(session.user.id);
+        loadPlan(session.user.id, session.user.email || "");
       }
     );
 
@@ -122,6 +126,30 @@ export default function StudioPage() {
       style: data.style || data.creator_style || "",
       goal: data.goal || data.emotional_preference || "",
     });
+  };
+
+  const loadPlan = async (userId: string, email: string) => {
+    const { data } = await supabase
+      .from("user_plans")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!data) {
+      await supabase.from("user_plans").insert([
+        {
+          user_id: userId,
+          email,
+          plan: "free",
+          status: "free",
+        },
+      ]);
+
+      setPlan("free");
+      return;
+    }
+
+    setPlan(data.status === "active" ? data.plan || "pro" : "free");
   };
 
   const loadUsage = async (userId: string) => {
@@ -293,7 +321,7 @@ export default function StudioPage() {
   const generateHooks = async () => {
     if (!idea.trim()) return;
 
-    if (generationCount >= 10) {
+    if (plan === "free" && generationCount >= 10) {
       setUpgradeNotice(true);
       return;
     }
@@ -339,6 +367,11 @@ export default function StudioPage() {
 
   const pushFurther = async () => {
     if (result.hooks.length === 0 && result.titles.length === 0) return;
+
+    if (plan === "free") {
+      setUpgradeNotice(true);
+      return;
+    }
 
     setExpanding(true);
 
@@ -386,6 +419,15 @@ Create deeper, sharper second-layer creator directions.
     setExpanding(false);
   };
 
+  const openPremiumTool = (tool: string) => {
+    if (plan === "free") {
+      setUpgradeNotice(true);
+      return;
+    }
+
+    alert(`${tool} unlocked. Full premium tool screen coming next.`);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
@@ -401,6 +443,11 @@ Create deeper, sharper second-layer creator directions.
     );
   }
 
+  const usageText =
+    plan === "free"
+      ? `Free Trial · ${generationCount}/10`
+      : `${plan.toUpperCase()} Plan · Unlimited`;
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
@@ -413,12 +460,18 @@ Create deeper, sharper second-layer creator directions.
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => router.push("/pricing")}
-              className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
-            >
-              ✦ Upgrade
-            </button>
+            {plan === "free" ? (
+              <button
+                onClick={() => router.push("/pricing")}
+                className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
+              >
+                ✦ Upgrade
+              </button>
+            ) : (
+              <div className="rounded-full border border-[#7ef2c2]/40 bg-[#effff7] px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#147a52] shadow-[0_8px_24px_rgba(126,242,194,0.18)]">
+                ✦ {plan} active
+              </div>
+            )}
 
             <button
               onClick={() => router.push("/onboarding")}
@@ -505,7 +558,7 @@ Create deeper, sharper second-layer creator directions.
           </h1>
 
           <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
-            Free Trial · {generationCount}/10
+            {usageText}
           </p>
 
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
@@ -604,11 +657,11 @@ Create deeper, sharper second-layer creator directions.
               ].map((tool) => (
                 <button
                   key={tool}
-                  onClick={() => router.push("/pricing")}
+                  onClick={() => openPremiumTool(tool)}
                   className="animate-fade-rise rounded-[1.7rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-6 text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,199,107,0.25)]"
                 >
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
-                    PRO LOCKED
+                    {plan === "free" ? "PRO LOCKED" : "UNLOCKED"}
                   </p>
 
                   <h3 className="mt-4 text-lg font-light text-black/70">
@@ -616,7 +669,9 @@ Create deeper, sharper second-layer creator directions.
                   </h3>
 
                   <p className="mt-3 text-sm leading-7 text-black/45">
-                    Unlock this premium creator system in Pro.
+                    {plan === "free"
+                      ? "Unlock this premium creator system in Pro."
+                      : "Premium creator system unlocked."}
                   </p>
                 </button>
               ))}
