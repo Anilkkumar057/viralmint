@@ -129,27 +129,58 @@ export default function StudioPage() {
   };
 
   const loadPlan = async (userId: string, email: string) => {
-    const { data } = await supabase
-      .from("user_plans")
-      .select("*")
-      .eq("user_id", userId)
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("plan, is_premium, is_locked")
+      .eq("id", userId)
       .maybeSingle();
 
-    if (!data) {
-      await supabase.from("user_plans").insert([
-        {
-          user_id: userId,
-          email,
-          plan: "free",
-          status: "free",
-        },
-      ]);
-
+    if (error) {
+      console.error("Plan load error:", error);
       setPlan("free");
       return;
     }
 
-    setPlan(data.status === "active" ? data.plan || "pro" : "free");
+    if (!data) {
+      const { data: createdProfile, error: createError } = await supabase
+        .from("user_profiles")
+        .insert([
+          {
+            id: userId,
+            email,
+            plan: "free",
+            is_premium: false,
+            is_locked: false,
+          },
+        ])
+        .select("plan, is_premium, is_locked")
+        .maybeSingle();
+
+      if (createError) {
+        console.error("Profile create error:", createError);
+        setPlan("free");
+        return;
+      }
+
+      setPlan(
+        createdProfile?.is_premium && createdProfile?.plan
+          ? createdProfile.plan
+          : "free"
+      );
+      return;
+    }
+
+    if (data.is_locked) {
+      setPlan("free");
+      return;
+    }
+
+    if (data.is_premium && data.plan) {
+      setPlan(data.plan);
+      return;
+    }
+
+    setPlan("free");
   };
 
   const loadUsage = async (userId: string) => {
@@ -450,7 +481,6 @@ Create deeper, sharper second-layer creator directions.
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
-      <PremiumToolsCard isPremium={plan !== "free"} />
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
