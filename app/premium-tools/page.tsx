@@ -24,7 +24,7 @@ export default function PremiumToolsCard({ isPremium }: Props) {
         href={isPremium ? "/premium-tools" : "/pricing"}
         className="mt-5 inline-flex rounded-2xl bg-emerald-400 px-5 py-3 font-black text-black hover:bg-emerald-300"
       >
-        {isPremium ? "Open Premium Tools" : "Unlock Premium"}
+        {isPremium ? "Open Premium Tools" : "Open Premium Tools"}
       </a>
     </section>
   );
