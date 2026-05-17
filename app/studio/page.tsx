@@ -37,8 +37,12 @@ export default function StudioPage() {
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("Hinglish");
+
   const [result, setResult] = useState<ResultState>(emptyResult);
   const [generationCount, setGenerationCount] = useState(0);
+
+  const [streakCount, setStreakCount] = useState(0);
+  const [lastGenerationDate, setLastGenerationDate] = useState("");
 
   const [vaultOpen, setVaultOpen] = useState(false);
   const [vaultLoading, setVaultLoading] = useState(false);
@@ -57,6 +61,7 @@ export default function StudioPage() {
       setUser(data.user);
       setAuthChecking(false);
       loadUsage(data.user.id);
+      loadStreak(data.user.id);
     };
 
     checkUser();
@@ -71,6 +76,7 @@ export default function StudioPage() {
         setUser(session.user);
         setAuthChecking(false);
         loadUsage(session.user.id);
+        loadStreak(session.user.id);
       }
     );
 
@@ -107,7 +113,59 @@ export default function StudioPage() {
       .eq("user_id", user.id);
   };
 
-  const saveGeneration = async (prompt: string, generatedResult: ResultState) => {
+  const loadStreak = async (userId: string) => {
+    const { data } = await supabase
+      .from("creator_streaks")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!data) {
+      await supabase.from("creator_streaks").insert([
+        {
+          user_id: userId,
+          streak_count: 0,
+          last_generation_date: "",
+        },
+      ]);
+
+      setStreakCount(0);
+      setLastGenerationDate("");
+      return;
+    }
+
+    setStreakCount(data.streak_count || 0);
+    setLastGenerationDate(data.last_generation_date || "");
+  };
+
+  const updateStreak = async () => {
+    if (!user) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (lastGenerationDate === today) return;
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayText = yesterday.toISOString().slice(0, 10);
+
+    const nextStreak =
+      lastGenerationDate === yesterdayText ? streakCount + 1 : 1;
+
+    setStreakCount(nextStreak);
+    setLastGenerationDate(today);
+
+    await supabase.from("creator_streaks").upsert({
+      user_id: user.id,
+      streak_count: nextStreak,
+      last_generation_date: today,
+    });
+  };
+
+  const saveGeneration = async (
+    prompt: string,
+    generatedResult: ResultState
+  ) => {
     if (!user) return;
 
     await supabase.from("generations").insert([
@@ -201,8 +259,10 @@ export default function StudioPage() {
       };
 
       setResult(generatedResult);
+
       await saveGeneration(idea, generatedResult);
       await updateUsage();
+      await updateStreak();
     } catch (error) {
       console.error(error);
     }
@@ -237,15 +297,24 @@ export default function StudioPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button onClick={loadVault} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
+            <button
+              onClick={loadVault}
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+            >
               {vaultLoading ? "Loading..." : "Vault"}
             </button>
 
-            <button onClick={() => router.push("/pricing")} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
+            <button
+              onClick={() => router.push("/pricing")}
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+            >
               Pricing
             </button>
 
-            <button onClick={signOut} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
+            <button
+              onClick={signOut}
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+            >
               Logout
             </button>
           </div>
@@ -258,7 +327,10 @@ export default function StudioPage() {
                 Saved Vault
               </p>
 
-              <button onClick={() => setVaultOpen(false)} className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black">
+              <button
+                onClick={() => setVaultOpen(false)}
+                className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black"
+              >
                 Close
               </button>
             </div>
@@ -268,18 +340,28 @@ export default function StudioPage() {
             ) : (
               <div className="space-y-4">
                 {vaultItems.map((item) => (
-                  <div key={item.id} className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white">
-                    <button onClick={() => useVaultItem(item)} className="w-full text-left">
+                  <div
+                    key={item.id}
+                    className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white"
+                  >
+                    <button
+                      onClick={() => useVaultItem(item)}
+                      className="w-full text-left"
+                    >
                       <p className="mb-3 text-xs uppercase tracking-[0.25em] text-black/35">
                         {new Date(item.created_at).toLocaleDateString()}
                       </p>
+
                       <p className="text-sm font-medium text-black/70">
                         {item.prompt}
                       </p>
                     </button>
 
                     <div className="mt-4 flex justify-end">
-                      <button onClick={() => deleteVaultItem(item.id)} className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500">
+                      <button
+                        onClick={() => deleteVaultItem(item.id)}
+                        className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500"
+                      >
                         Delete
                       </button>
                     </div>
@@ -301,6 +383,10 @@ export default function StudioPage() {
 
           <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
             Free Usage · {generationCount}/10
+          </p>
+
+          <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
+            Creative Flow · Day {streakCount}
           </p>
 
           <div className="mt-10 w-full max-w-2xl rounded-[2.5rem] border border-black/10 bg-white/55 p-5 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
@@ -333,23 +419,21 @@ export default function StudioPage() {
                   onClick={() => router.push("/pricing")}
                   className="group relative overflow-hidden rounded-[1.5rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-5 text-left hover:-translate-y-1 hover:shadow-[0_18px_55px_rgba(245,199,107,0.25)]"
                 >
-                  <div className="relative">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
-                      PRO LOCKED
-                    </p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
+                    PRO LOCKED
+                  </p>
 
-                    <h3 className="mt-3 text-lg font-light text-black/70">
-                      {tool}
-                    </h3>
+                  <h3 className="mt-3 text-lg font-light text-black/70">
+                    {tool}
+                  </h3>
 
-                    <p className="mt-3 text-xs leading-6 text-black/45">
-                      Unlock this premium creator system in Pro.
-                    </p>
+                  <p className="mt-3 text-xs leading-6 text-black/45">
+                    Unlock this premium creator system in Pro.
+                  </p>
 
-                    <p className="mt-5 text-xs uppercase tracking-[0.25em] text-black/40 group-hover:text-black">
-                      Unlock →
-                    </p>
-                  </div>
+                  <p className="mt-5 text-xs uppercase tracking-[0.25em] text-black/40 group-hover:text-black">
+                    Unlock →
+                  </p>
                 </button>
               ))}
             </div>
@@ -361,11 +445,45 @@ export default function StudioPage() {
             result.ctas.length > 0 ||
             result.openings.length > 0) && (
             <div className="mt-14 w-full max-w-3xl space-y-10 text-left">
-              <OutputBlock title="Hooks" items={result.hooks} copiedKey={copiedKey} copyText={copyText} section="hooks" />
-              <OutputBlock title="Titles" items={result.titles} copiedKey={copiedKey} copyText={copyText} section="titles" />
-              <OutputBlock title="Thumbnail Direction" items={result.thumbnails} copiedKey={copiedKey} copyText={copyText} section="thumbnails" />
-              <OutputBlock title="Opening Sequence" items={result.openings} copiedKey={copiedKey} copyText={copyText} section="openings" />
-              <OutputBlock title="Emotional CTA" items={result.ctas} copiedKey={copiedKey} copyText={copyText} section="ctas" />
+              <OutputBlock
+                title="Hooks"
+                items={result.hooks}
+                copiedKey={copiedKey}
+                copyText={copyText}
+                section="hooks"
+              />
+
+              <OutputBlock
+                title="Titles"
+                items={result.titles}
+                copiedKey={copiedKey}
+                copyText={copyText}
+                section="titles"
+              />
+
+              <OutputBlock
+                title="Thumbnail Direction"
+                items={result.thumbnails}
+                copiedKey={copiedKey}
+                copyText={copyText}
+                section="thumbnails"
+              />
+
+              <OutputBlock
+                title="Opening Sequence"
+                items={result.openings}
+                copiedKey={copiedKey}
+                copyText={copyText}
+                section="openings"
+              />
+
+              <OutputBlock
+                title="Emotional CTA"
+                items={result.ctas}
+                copiedKey={copiedKey}
+                copyText={copyText}
+                section="ctas"
+              />
             </div>
           )}
         </section>
@@ -383,7 +501,10 @@ export default function StudioPage() {
             {loading ? "Generating..." : "Generate"}
           </button>
 
-          <button onClick={() => router.push("/pricing")} className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 hover:bg-black hover:text-white">
+          <button
+            onClick={() => router.push("/pricing")}
+            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 hover:bg-black hover:text-white"
+          >
             Upgrade
           </button>
         </div>
@@ -402,7 +523,11 @@ function LanguageToggle({
   compact?: boolean;
 }) {
   return (
-    <div className={compact ? "flex justify-center gap-2" : "mb-4 flex justify-center gap-2"}>
+    <div
+      className={
+        compact ? "flex justify-center gap-2" : "mb-4 flex justify-center gap-2"
+      }
+    >
       {["English", "Hindi", "Hinglish"].map((item) => (
         <button
           key={item}
@@ -446,10 +571,16 @@ function OutputBlock({
           const key = `${section}-${index}`;
 
           return (
-            <div key={key} className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)] backdrop-blur-xl">
+            <div
+              key={key}
+              className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)] backdrop-blur-xl"
+            >
               <p>{item}</p>
 
-              <button onClick={() => copyText(item, key)} className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black">
+              <button
+                onClick={() => copyText(item, key)}
+                className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
+              >
                 {copiedKey === key ? "Copied" : "Copy"}
               </button>
             </div>
