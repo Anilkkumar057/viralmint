@@ -1,5 +1,5 @@
 "use client";
-
+import PremiumToolsCard from "@/components/PremiumToolsCard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
@@ -450,6 +450,7 @@ Create deeper, sharper second-layer creator directions.
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
+      <PremiumToolsCard isPremium={profile?.is_premium === true} />
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
@@ -495,6 +496,10 @@ Create deeper, sharper second-layer creator directions.
             </button>
           </div>
         </header>
+
+        <div className="mt-8 animate-fade-rise">
+          <PremiumToolsCard isPremium={plan !== "free"} />
+        </div>
 
         {vaultOpen && (
           <section className="animate-fade-rise mt-10 rounded-[2rem] border border-black/10 bg-white/65 p-6 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl">
