@@ -48,8 +48,9 @@ export default function AdminApprovalDashboard() {
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile?.is_admin) {
-      setIsAdmin(false);
+const adminEmails = ["mystocktradesk@gmail.com"];
+
+if (!adminEmails.includes(user.email || "")) {      setIsAdmin(false);
       setStatus("Access denied. Admin only.");
       setLoading(false);
       return;
