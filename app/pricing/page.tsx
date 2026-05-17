@@ -113,7 +113,7 @@ export default function PricingPage() {
           </div>
 
           <Link
-            href="/studio"
+            href="/"
             className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
           >
             Back to Studio

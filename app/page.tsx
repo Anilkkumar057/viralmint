@@ -39,10 +39,7 @@ export default function LandingPage() {
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">
-              VIRAL MINT
-            </p>
-
+            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
               emotionally intelligent creator OS
             </p>
@@ -103,76 +100,6 @@ export default function LandingPage() {
             <Link
               href="/pricing"
               className="rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500 hover:bg-black hover:text-white"
-            >
-              View Plans
-            </Link>
-          </div>
-
-          <div className="mt-24 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="rounded-[2rem] border border-black/10 bg-white/60 p-8 text-left backdrop-blur-xl">
-              <p className="text-xs uppercase tracking-[0.3em] text-black/35">
-                HOOK ENGINE
-              </p>
-
-              <h3 className="mt-5 text-2xl font-light">
-                Emotionally sticky openings
-              </h3>
-
-              <p className="mt-5 text-sm leading-7 text-black/55">
-                Generate hooks engineered for curiosity loops, replay energy,
-                emotional tension, and audience retention.
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] border border-black/10 bg-white/60 p-8 text-left backdrop-blur-xl">
-              <p className="text-xs uppercase tracking-[0.3em] text-black/35">
-                CREATOR DNA
-              </p>
-
-              <h3 className="mt-5 text-2xl font-light">
-                Personalized creator intelligence
-              </h3>
-
-              <p className="mt-5 text-sm leading-7 text-black/55">
-                Viral Mint adapts to your platform, audience emotion, creator
-                style, and storytelling energy.
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] border border-black/10 bg-white/60 p-8 text-left backdrop-blur-xl">
-              <p className="text-xs uppercase tracking-[0.3em] text-black/35">
-                VIRAL MOMENTUM
-              </p>
-
-              <h3 className="mt-5 text-2xl font-light">
-                AI built for creator growth
-              </h3>
-
-              <p className="mt-5 text-sm leading-7 text-black/55">
-                Build content systems designed for audience pull, emotional
-                resonance, and long-term creator expansion.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-24 w-full max-w-4xl rounded-[2.5rem] border border-black/10 bg-white/70 p-10 backdrop-blur-xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-              VIRAL MINT PRO
-            </p>
-
-            <h2 className="mt-5 text-4xl font-light leading-tight md:text-5xl">
-              Unlock the creator growth reactor.
-            </h2>
-
-            <p className="mx-auto mt-6 max-w-2xl text-sm leading-8 text-black/55 md:text-base">
-              Unlimited generations, creator memory systems, emotional
-              positioning layers, cinematic scripting, replay psychology, and
-              advanced creator intelligence.
-            </p>
-
-            <Link
-              href="/pricing"
-              className="mt-10 inline-flex rounded-full bg-black px-8 py-4 text-xs uppercase tracking-[0.3em] text-white transition-all duration-500 hover:scale-[1.03]"
             >
               View Plans
             </Link>
