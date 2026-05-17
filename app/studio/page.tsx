@@ -43,10 +43,12 @@ export default function StudioPage() {
 
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
+  const [expanding, setExpanding] = useState(false);
   const [language, setLanguage] = useState("Hinglish");
 
   const [profile, setProfile] = useState<CreatorProfile | null>(null);
   const [result, setResult] = useState<ResultState>(emptyResult);
+  const [expanded, setExpanded] = useState<string[]>([]);
 
   const [generationCount, setGenerationCount] = useState(0);
   const [streakCount, setStreakCount] = useState(0);
@@ -165,6 +167,8 @@ export default function StudioPage() {
         },
       ]);
 
+      setStreakCount(0);
+      setLastGenerationDate("");
       return;
     }
 
@@ -183,7 +187,6 @@ export default function StudioPage() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     const yesterdayText = yesterday.toISOString().slice(0, 10);
-
     const nextStreak =
       lastGenerationDate === yesterdayText ? streakCount + 1 : 1;
 
@@ -210,6 +213,21 @@ export default function StudioPage() {
         result: JSON.stringify(generatedResult),
       },
     ]);
+  };
+
+  const saveSingleOutput = async (section: keyof ResultState, text: string) => {
+    if (!user) return;
+
+    const singleResult: ResultState = {
+      hooks: section === "hooks" ? [text] : [],
+      titles: section === "titles" ? [text] : [],
+      thumbnails: section === "thumbnails" ? [text] : [],
+      ctas: section === "ctas" ? [text] : [],
+      openings: section === "openings" ? [text] : [],
+    };
+
+    await saveGeneration(`Saved ${section}: ${idea || "Viral Mint output"}`, singleResult);
+    await loadVault();
   };
 
   const loadVault = async () => {
@@ -239,7 +257,20 @@ export default function StudioPage() {
       setResult(emptyResult);
     }
 
+    setExpanded([]);
     setVaultOpen(false);
+  };
+
+  const deleteVaultItem = async (id: string) => {
+    if (!user) return;
+
+    setVaultItems((prev) => prev.filter((item) => item.id !== id));
+
+    await supabase
+      .from("generations")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
   };
 
   const copyText = async (text: string, key: string) => {
@@ -257,6 +288,8 @@ export default function StudioPage() {
     }
 
     setLoading(true);
+    setExpanded([]);
+    setResult(emptyResult);
 
     try {
       const response = await fetch("/api/generate", {
@@ -293,6 +326,55 @@ export default function StudioPage() {
     setLoading(false);
   };
 
+  const pushFurther = async () => {
+    if (result.hooks.length === 0 && result.titles.length === 0) return;
+
+    setExpanding(true);
+
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: `
+Expand these creator ideas deeper.
+
+Original Idea:
+${idea}
+
+Hooks:
+${result.hooks.join("\n")}
+
+Titles:
+${result.titles.join("\n")}
+
+Create deeper, sharper second-layer creator directions.
+          `,
+          language,
+          creatorProfile: profile,
+        }),
+      });
+
+      const data = await response.json();
+
+      setExpanded([
+        ...(data.hooks || []),
+        ...(data.titles || []),
+        ...(data.openings || []),
+      ]);
+    } catch {
+      setExpanded([
+        "Push stronger emotional contrast.",
+        "Make the first line feel more specific and less generic.",
+        "Add a creator identity angle that makes the audience feel seen.",
+      ]);
+    }
+
+    setExpanding(false);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
@@ -309,14 +391,11 @@ export default function StudioPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-20 text-black">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">
-              VIRAL MINT
-            </p>
-
+            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
               emotionally intelligent creator os
             </p>
@@ -328,6 +407,13 @@ export default function StudioPage() {
               className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
             >
               ✦ Upgrade
+            </button>
+
+            <button
+              onClick={() => router.push("/onboarding")}
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+            >
+              Edit DNA
             </button>
 
             <button
@@ -382,6 +468,15 @@ export default function StudioPage() {
                         {item.prompt}
                       </p>
                     </button>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        onClick={() => deleteVaultItem(item.id)}
+                        className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -470,6 +565,7 @@ export default function StudioPage() {
                 items={result.hooks}
                 copiedKey={copiedKey}
                 copyText={copyText}
+                saveSingleOutput={saveSingleOutput}
                 section="hooks"
               />
 
@@ -478,6 +574,7 @@ export default function StudioPage() {
                 items={result.titles}
                 copiedKey={copiedKey}
                 copyText={copyText}
+                saveSingleOutput={saveSingleOutput}
                 section="titles"
               />
 
@@ -486,7 +583,8 @@ export default function StudioPage() {
                 items={result.thumbnails}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="thumb"
+                saveSingleOutput={saveSingleOutput}
+                section="thumbnails"
               />
 
               <OutputBlock
@@ -494,7 +592,8 @@ export default function StudioPage() {
                 items={result.openings}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="open"
+                saveSingleOutput={saveSingleOutput}
+                section="openings"
               />
 
               <OutputBlock
@@ -502,11 +601,51 @@ export default function StudioPage() {
                 items={result.ctas}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="cta"
+                saveSingleOutput={saveSingleOutput}
+                section="ctas"
               />
+
+              <div className="flex justify-center">
+                <button
+                  onClick={pushFurther}
+                  disabled={expanding}
+                  className="rounded-full border border-black/10 bg-white/70 px-8 py-4 text-xs uppercase tracking-[0.3em] text-black/55 hover:bg-black hover:text-white disabled:opacity-40"
+                >
+                  {expanding ? "Unfolding..." : "Push Further →"}
+                </button>
+              </div>
+
+              {expanded.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-xs uppercase tracking-[0.35em] text-black/35">
+                    Deeper Directions
+                  </p>
+
+                  {expanded.map((item, index) => (
+                    <div
+                      key={index}
+                      className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)]"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
+      </div>
+
+      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_70px_rgba(126,242,194,0.18)] backdrop-blur-xl">
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={generateHooks}
+            disabled={loading || !idea.trim()}
+            className="rounded-full bg-black px-8 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.36)] disabled:opacity-40"
+          >
+            {loading ? "Generating..." : "Generate"}
+          </button>
+        </div>
       </div>
     </main>
   );
@@ -543,13 +682,15 @@ function OutputBlock({
   items,
   copiedKey,
   copyText,
+  saveSingleOutput,
   section,
 }: {
   title: string;
   items: string[];
   copiedKey: string;
   copyText: (text: string, key: string) => void;
-  section: string;
+  saveSingleOutput: (section: keyof ResultState, text: string) => void;
+  section: keyof ResultState;
 }) {
   if (items.length === 0) return null;
 
@@ -570,12 +711,21 @@ function OutputBlock({
             >
               <p>{item}</p>
 
-              <button
-                onClick={() => copyText(item, key)}
-                className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
-              >
-                {copiedKey === key ? "Copied" : "Copy"}
-              </button>
+              <div className="mt-4 flex gap-4">
+                <button
+                  onClick={() => copyText(item, key)}
+                  className="text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
+                >
+                  {copiedKey === key ? "Copied" : "Copy"}
+                </button>
+
+                <button
+                  onClick={() => saveSingleOutput(section, item)}
+                  className="text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
+                >
+                  Save
+                </button>
+              </div>
             </div>
           );
         })}
