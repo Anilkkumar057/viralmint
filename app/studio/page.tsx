@@ -13,13 +13,6 @@ type ResultState = {
   openings: string[];
 };
 
-type VaultItem = {
-  id: string;
-  prompt: string;
-  result: string;
-  created_at: string;
-};
-
 type CreatorProfile = {
   niche?: string;
   platform?: string;
@@ -43,20 +36,19 @@ export default function StudioPage() {
 
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
-  const [expanding, setExpanding] = useState(false);
   const [language, setLanguage] = useState("Hinglish");
 
   const [profile, setProfile] = useState<CreatorProfile | null>(null);
+
   const [result, setResult] = useState<ResultState>(emptyResult);
-  const [expanded, setExpanded] = useState<string[]>([]);
 
   const [generationCount, setGenerationCount] = useState(0);
+
   const [streakCount, setStreakCount] = useState(0);
   const [lastGenerationDate, setLastGenerationDate] = useState("");
 
-  const [vaultOpen, setVaultOpen] = useState(false);
-  const [vaultLoading, setVaultLoading] = useState(false);
-  const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
+  const [upgradeNotice, setUpgradeNotice] = useState(false);
+
   const [copiedKey, setCopiedKey] = useState("");
 
   useEffect(() => {
@@ -86,11 +78,6 @@ export default function StudioPage() {
         }
 
         setUser(session.user);
-        setAuthChecking(false);
-
-        loadProfile(session.user.id);
-        loadUsage(session.user.id);
-        loadStreak(session.user.id);
       }
     );
 
@@ -98,29 +85,24 @@ export default function StudioPage() {
   }, [router]);
 
   const loadProfile = async (userId: string) => {
-  const { data, error } = await supabase
-    .from("creator_profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+    const { data } = await supabase
+      .from("creator_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Profile load error:", error);
-    return;
-  }
+    if (!data) {
+      router.push("/onboarding");
+      return;
+    }
 
-  if (!data) {
-    router.push("/onboarding");
-    return;
-  }
-
-  setProfile({
-    niche: data.niche || "",
-    platform: data.platform || data.main_platform || "",
-    style: data.style || data.creator_style || "",
-    goal: data.goal || data.emotional_preference || "",
-  });
-};
+    setProfile({
+      niche: data.niche || "",
+      platform: data.platform || "",
+      style: data.style || "",
+      goal: data.goal || "",
+    });
+  };
 
   const loadUsage = async (userId: string) => {
     const { data } = await supabase
@@ -148,11 +130,14 @@ export default function StudioPage() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
+
     setGenerationCount(nextCount);
 
     await supabase
       .from("usage_limits")
-      .update({ generation_count: nextCount })
+      .update({
+        generation_count: nextCount,
+      })
       .eq("user_id", user.id);
   };
 
@@ -172,8 +157,6 @@ export default function StudioPage() {
         },
       ]);
 
-      setStreakCount(0);
-      setLastGenerationDate("");
       return;
     }
 
@@ -192,6 +175,7 @@ export default function StudioPage() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     const yesterdayText = yesterday.toISOString().slice(0, 10);
+
     const nextStreak =
       lastGenerationDate === yesterdayText ? streakCount + 1 : 1;
 
@@ -205,96 +189,25 @@ export default function StudioPage() {
     });
   };
 
-  const saveGeneration = async (
-    prompt: string,
-    generatedResult: ResultState
-  ) => {
-    if (!user) return;
-
-    await supabase.from("generations").insert([
-      {
-        user_id: user.id,
-        prompt,
-        result: JSON.stringify(generatedResult),
-      },
-    ]);
-  };
-
-  const saveSingleOutput = async (section: keyof ResultState, text: string) => {
-    if (!user) return;
-
-    const singleResult: ResultState = {
-      hooks: section === "hooks" ? [text] : [],
-      titles: section === "titles" ? [text] : [],
-      thumbnails: section === "thumbnails" ? [text] : [],
-      ctas: section === "ctas" ? [text] : [],
-      openings: section === "openings" ? [text] : [],
-    };
-
-    await saveGeneration(`Saved ${section}: ${idea || "Viral Mint output"}`, singleResult);
-    await loadVault();
-  };
-
-  const loadVault = async () => {
-    if (!user) return;
-
-    setVaultLoading(true);
-
-    const { data } = await supabase
-      .from("generations")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    if (data) setVaultItems(data as VaultItem[]);
-
-    setVaultOpen(true);
-    setVaultLoading(false);
-  };
-
-  const useVaultItem = (item: VaultItem) => {
-    setIdea(item.prompt);
-
-    try {
-      setResult(JSON.parse(item.result));
-    } catch {
-      setResult(emptyResult);
-    }
-
-    setExpanded([]);
-    setVaultOpen(false);
-  };
-
-  const deleteVaultItem = async (id: string) => {
-    if (!user) return;
-
-    setVaultItems((prev) => prev.filter((item) => item.id !== id));
-
-    await supabase
-      .from("generations")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id);
-  };
-
   const copyText = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
+
     setCopiedKey(key);
-    setTimeout(() => setCopiedKey(""), 1200);
+
+    setTimeout(() => {
+      setCopiedKey("");
+    }, 1200);
   };
 
   const generateHooks = async () => {
     if (!idea.trim()) return;
 
     if (generationCount >= 10) {
-      router.push("/pricing");
+      setUpgradeNotice(true);
       return;
     }
 
     setLoading(true);
-    setExpanded([]);
-    setResult(emptyResult);
 
     try {
       const response = await fetch("/api/generate", {
@@ -321,7 +234,6 @@ export default function StudioPage() {
 
       setResult(generatedResult);
 
-      await saveGeneration(idea, generatedResult);
       await updateUsage();
       await updateStreak();
     } catch (error) {
@@ -331,55 +243,6 @@ export default function StudioPage() {
     setLoading(false);
   };
 
-  const pushFurther = async () => {
-    if (result.hooks.length === 0 && result.titles.length === 0) return;
-
-    setExpanding(true);
-
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: `
-Expand these creator ideas deeper.
-
-Original Idea:
-${idea}
-
-Hooks:
-${result.hooks.join("\n")}
-
-Titles:
-${result.titles.join("\n")}
-
-Create deeper, sharper second-layer creator directions.
-          `,
-          language,
-          creatorProfile: profile,
-        }),
-      });
-
-      const data = await response.json();
-
-      setExpanded([
-        ...(data.hooks || []),
-        ...(data.titles || []),
-        ...(data.openings || []),
-      ]);
-    } catch {
-      setExpanded([
-        "Push stronger emotional contrast.",
-        "Make the first line feel more specific and less generic.",
-        "Add a creator identity angle that makes the audience feel seen.",
-      ]);
-    }
-
-    setExpanding(false);
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
@@ -387,109 +250,51 @@ Create deeper, sharper second-layer creator directions.
 
   if (authChecking) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-black">
-        <p className="text-xs uppercase tracking-[0.3em] text-black/40">
-          Opening Studio...
-        </p>
+      <main className="flex min-h-screen items-center justify-center">
+        Opening Studio...
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 backdrop-blur-xl">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
+            <p className="text-lg font-light tracking-[0.35em]">
+              VIRAL MINT
+            </p>
+
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
               emotionally intelligent creator os
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/pricing")}
-              className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
+              className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c]"
             >
               ✦ Upgrade
             </button>
 
             <button
               onClick={() => router.push("/onboarding")}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em]"
             >
               Edit DNA
             </button>
 
             <button
-              onClick={loadVault}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
-            >
-              {vaultLoading ? "Loading..." : "Vault"}
-            </button>
-
-            <button
               onClick={signOut}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em]"
             >
               Logout
             </button>
           </div>
         </header>
 
-        {vaultOpen && (
-          <section className="mt-10 rounded-[2rem] border border-black/10 bg-white/65 p-6 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.35em] text-black/40">
-                Saved Vault
-              </p>
-
-              <button
-                onClick={() => setVaultOpen(false)}
-                className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black"
-              >
-                Close
-              </button>
-            </div>
-
-            {vaultItems.length === 0 ? (
-              <p className="text-sm text-black/50">No saved generations yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {vaultItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white"
-                  >
-                    <button
-                      onClick={() => useVaultItem(item)}
-                      className="w-full text-left"
-                    >
-                      <p className="mb-3 text-xs uppercase tracking-[0.25em] text-black/35">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </p>
-
-                      <p className="text-sm font-medium text-black/70">
-                        {item.prompt}
-                      </p>
-                    </button>
-
-                    <div className="mt-4 flex justify-end">
-                      <button
-                        onClick={() => deleteVaultItem(item.id)}
-                        className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        <section className="flex flex-1 flex-col items-center justify-center py-20 text-center">
+        <section className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-5 text-xs uppercase tracking-[0.4em] text-black/35">
             creator workspace
           </p>
@@ -499,7 +304,7 @@ Create deeper, sharper second-layer creator directions.
           </h1>
 
           <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
-            Free Usage · {generationCount}/10
+            Free Trial · {generationCount}/10
           </p>
 
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
@@ -513,8 +318,68 @@ Create deeper, sharper second-layer creator directions.
             </p>
           )}
 
-          <div className="mt-10 w-full max-w-3xl rounded-[2.5rem] border border-black/10 bg-white/55 p-6 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
-            <LanguageToggle language={language} setLanguage={setLanguage} />
+          {upgradeNotice && (
+            <div className="mt-8 w-full max-w-2xl overflow-hidden rounded-[2.3rem] border border-[#f5c76b]/30 bg-[linear-gradient(135deg,rgba(255,250,242,0.96),rgba(255,245,225,0.96))] p-7 text-left shadow-[0_25px_80px_rgba(245,199,107,0.18)] backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.4em] text-[#8a641c]">
+                    CREATOR FLOW
+                  </p>
+
+                  <h3 className="mt-4 text-3xl font-light leading-tight text-black/85">
+                    Your free creator session is complete.
+                  </h3>
+                </div>
+
+                <div className="rounded-full border border-[#f5c76b]/30 bg-white/60 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c]">
+                  10 / 10 Used
+                </div>
+              </div>
+
+              <p className="mt-6 text-sm leading-8 text-black/60">
+                Viral Mint has now started adapting to your creator identity,
+                audience psychology, platform style, and emotional tone.
+              </p>
+
+              <p className="mt-4 text-sm leading-8 text-black/55">
+                Premium unlocks a deeper creator workspace designed for
+                long-term growth, stronger emotional hooks, cinematic expansion,
+                audience retention systems, and unlimited creation flow.
+              </p>
+
+              <div className="mt-7 rounded-[1.6rem] border border-[#7ef2c2]/20 bg-[#effff7] p-5">
+                <p className="text-xs uppercase tracking-[0.3em] text-[#147a52]">
+                  Early Creator Access
+                </p>
+
+                <p className="mt-3 text-sm leading-7 text-black/58">
+                  Founding creators currently receive access before wider public rollout.
+                </p>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  onClick={() => router.push("/pricing")}
+                  className="rounded-full bg-black px-7 py-4 text-xs uppercase tracking-[0.28em] text-white"
+                >
+                  Continue With Premium
+                </button>
+
+                <button
+                  onClick={() => setUpgradeNotice(false)}
+                  className="rounded-full border border-black/10 bg-white/70 px-7 py-4 text-xs uppercase tracking-[0.25em] text-black/45"
+                >
+                  Stay in Studio
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-10 w-full max-w-3xl rounded-[2.5rem] border border-black/10 bg-white/55 p-6 backdrop-blur-xl">
+            <LanguageToggle
+              language={language}
+              setLanguage={setLanguage}
+            />
 
             <textarea
               value={idea}
@@ -526,37 +391,10 @@ Create deeper, sharper second-layer creator directions.
             <button
               onClick={generateHooks}
               disabled={loading}
-              className="mt-6 rounded-full bg-black px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.25)] hover:scale-[1.03] hover:shadow-[0_14px_50px_rgba(126,242,194,0.40)] disabled:opacity-40"
+              className="mt-6 rounded-full bg-black px-10 py-4 text-sm uppercase tracking-[0.25em] text-white"
             >
               {loading ? "Generating..." : "Generate"}
             </button>
-
-            <div className="mt-12 grid gap-5 md:grid-cols-2">
-              {[
-                "Replay Psychology Engine",
-                "Cinematic Story Expansion",
-                "Audience Emotion Map",
-                "Viral Momentum Analyzer",
-              ].map((tool) => (
-                <button
-                  key={tool}
-                  onClick={() => router.push("/pricing")}
-                  className="rounded-[1.7rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-6 text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,199,107,0.25)]"
-                >
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
-                    PRO LOCKED
-                  </p>
-
-                  <h3 className="mt-4 text-lg font-light text-black/70">
-                    {tool}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-black/45">
-                    Unlock this premium creator system in Pro.
-                  </p>
-                </button>
-              ))}
-            </div>
           </div>
 
           {(result.hooks.length > 0 ||
@@ -570,7 +408,6 @@ Create deeper, sharper second-layer creator directions.
                 items={result.hooks}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                saveSingleOutput={saveSingleOutput}
                 section="hooks"
               />
 
@@ -579,7 +416,6 @@ Create deeper, sharper second-layer creator directions.
                 items={result.titles}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                saveSingleOutput={saveSingleOutput}
                 section="titles"
               />
 
@@ -588,8 +424,7 @@ Create deeper, sharper second-layer creator directions.
                 items={result.thumbnails}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                saveSingleOutput={saveSingleOutput}
-                section="thumbnails"
+                section="thumb"
               />
 
               <OutputBlock
@@ -597,8 +432,7 @@ Create deeper, sharper second-layer creator directions.
                 items={result.openings}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                saveSingleOutput={saveSingleOutput}
-                section="openings"
+                section="open"
               />
 
               <OutputBlock
@@ -606,47 +440,19 @@ Create deeper, sharper second-layer creator directions.
                 items={result.ctas}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                saveSingleOutput={saveSingleOutput}
-                section="ctas"
+                section="cta"
               />
-
-              <div className="flex justify-center">
-                <button
-                  onClick={pushFurther}
-                  disabled={expanding}
-                  className="rounded-full border border-black/10 bg-white/70 px-8 py-4 text-xs uppercase tracking-[0.3em] text-black/55 hover:bg-black hover:text-white disabled:opacity-40"
-                >
-                  {expanding ? "Unfolding..." : "Push Further →"}
-                </button>
-              </div>
-
-              {expanded.length > 0 && (
-                <div className="space-y-4">
-                  <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                    Deeper Directions
-                  </p>
-
-                  {expanded.map((item, index) => (
-                    <div
-                      key={index}
-                      className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)]"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </section>
       </div>
 
-      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_70px_rgba(126,242,194,0.18)] backdrop-blur-xl">
-        <div className="flex items-center justify-center gap-3">
+      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 backdrop-blur-xl">
+        <div className="flex justify-center">
           <button
             onClick={generateHooks}
             disabled={loading || !idea.trim()}
-            className="rounded-full bg-black px-8 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.36)] disabled:opacity-40"
+            className="rounded-full bg-black px-8 py-3 text-xs uppercase tracking-[0.25em] text-white"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
@@ -672,7 +478,7 @@ function LanguageToggle({
           className={
             language === item
               ? "rounded-full bg-black px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-white"
-              : "rounded-full border border-black/10 bg-white/60 px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-black/45 hover:bg-black hover:text-white"
+              : "rounded-full border border-black/10 bg-white/60 px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-black/45"
           }
         >
           {item}
@@ -687,15 +493,13 @@ function OutputBlock({
   items,
   copiedKey,
   copyText,
-  saveSingleOutput,
   section,
 }: {
   title: string;
   items: string[];
   copiedKey: string;
   copyText: (text: string, key: string) => void;
-  saveSingleOutput: (section: keyof ResultState, text: string) => void;
-  section: keyof ResultState;
+  section: string;
 }) {
   if (items.length === 0) return null;
 
@@ -712,25 +516,16 @@ function OutputBlock({
           return (
             <div
               key={key}
-              className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)]"
+              className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70"
             >
               <p>{item}</p>
 
-              <div className="mt-4 flex gap-4">
-                <button
-                  onClick={() => copyText(item, key)}
-                  className="text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
-                >
-                  {copiedKey === key ? "Copied" : "Copy"}
-                </button>
-
-                <button
-                  onClick={() => saveSingleOutput(section, item)}
-                  className="text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
-                >
-                  Save
-                </button>
-              </div>
+              <button
+                onClick={() => copyText(item, key)}
+                className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35"
+              >
+                {copiedKey === key ? "Copied" : "Copy"}
+              </button>
             </div>
           );
         })}
