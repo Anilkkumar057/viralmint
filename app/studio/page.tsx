@@ -1,340 +1,360 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import Link from "next/link";
 import { supabase } from "../../lib/supabase";
-import type { User } from "@supabase/supabase-js";
 
-export default function StudioPage() {
-  const router = useRouter();
+const plans = [
+  {
+    name: "Creator",
+    oldMonthly: 999,
+    monthly: 299,
+    annualMonthly: 199,
+    features: [
+      "Unlimited hooks",
+      "Creator identity memory",
+      "Vault access",
+      "Emotional CTA generation",
+      "Basic creator momentum tags",
+    ],
+  },
+  {
+    name: "Pro Creator",
+    oldMonthly: 2999,
+    monthly: 999,
+    annualMonthly: 699,
+    popular: true,
+    features: [
+      "Unlimited generations",
+      "Cinematic script systems",
+      "Replay psychology engine",
+      "Advanced creator memory",
+      "Priority AI responses",
+      "Viral momentum analysis",
+    ],
+  },
+  {
+    name: "Elite",
+    oldMonthly: 5999,
+    monthly: 2999,
+    annualMonthly: 1999,
+    features: [
+      "Full creator operating system",
+      "Advanced AI unfolding",
+      "Platform-specific growth systems",
+      "Premium creator intelligence",
+      "Priority future features",
+      "Early access expansions",
+    ],
+  },
+];
 
-  const [user, setUser] = useState<User | null>(null);
-  const [authChecking, setAuthChecking] = useState(true);
+export default function PricingPage() {
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
-  const [idea, setIdea] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState("Hinglish");
+  const [email, setEmail] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [query, setQuery] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const [hooks, setHooks] = useState<string[]>([]);
-  const [titles, setTitles] = useState<string[]>([]);
-  const [thumbnails, setThumbnails] = useState<string[]>([]);
-  const [ctas, setCtas] = useState<string[]>([]);
-  const [openings, setOpenings] = useState<string[]>([]);
+  const paymentRef = useRef<HTMLElement | null>(null);
+  const activePlan = plans.find((plan) => plan.name === selectedPlan);
 
-  const [generationCount, setGenerationCount] = useState(0);
+  const getPrice = (plan: (typeof plans)[number]) =>
+    billing === "monthly" ? plan.monthly : plan.annualMonthly;
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
+  const getBillingTotal = (plan: (typeof plans)[number]) =>
+    billing === "monthly" ? plan.monthly : plan.annualMonthly * 12;
 
-      if (!data.user) {
-        router.push("/");
-        return;
-      }
+  const getSaving = (plan: (typeof plans)[number]) =>
+    billing === "annual" ? (plan.monthly - plan.annualMonthly) * 12 : 0;
 
-      setUser(data.user);
-      await loadUsage(data.user.id);
-      setAuthChecking(false);
-    };
+  const submitPaymentQuery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activePlan) return;
 
-    checkUser();
+    setSubmitting(true);
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session?.user) {
-          router.push("/");
-          return;
-        }
+    const { error } = await supabase.from("payment_queries").insert([
+      {
+        email,
+        transaction_id: transactionId,
+        plan: `${activePlan.name} (${billing})`,
+        query,
+      },
+    ]);
 
-        setUser(session.user);
-        await loadUsage(session.user.id);
-        setAuthChecking(false);
-      }
-    );
+    setSubmitting(false);
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, [router]);
-
-  const loadUsage = async (userId: string) => {
-    const { data } = await supabase
-      .from("usage_limits")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (!data) {
-      await supabase.from("usage_limits").insert([
-        {
-          user_id: userId,
-          generation_count: 0,
-        },
-      ]);
-
-      setGenerationCount(0);
+    if (error) {
+      alert("Something went wrong. Please try again.");
       return;
     }
 
-    setGenerationCount(data.generation_count || 0);
+    setSuccess(true);
+    setEmail("");
+    setTransactionId("");
+    setQuery("");
+
+    setTimeout(() => setSuccess(false), 5000);
   };
-
-  const updateUsage = async () => {
-    if (!user) return;
-
-    const nextCount = generationCount + 1;
-    setGenerationCount(nextCount);
-
-    await supabase
-      .from("usage_limits")
-      .update({
-        generation_count: nextCount,
-      })
-      .eq("user_id", user.id);
-  };
-
-  const generateHooks = async () => {
-    if (!idea.trim()) return;
-
-    if (generationCount >= 10) {
-      router.push("/pricing");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: idea,
-          language,
-        }),
-      });
-
-      const data = await response.json();
-
-      setHooks(data.hooks || []);
-      setTitles(data.titles || []);
-      setThumbnails(data.thumbnails || []);
-      setCtas(data.ctas || []);
-      setOpenings(data.openings || []);
-
-      await updateUsage();
-    } catch (error) {
-      console.error(error);
-    }
-
-    setLoading(false);
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
-
-  if (authChecking) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#fffaf2]">
-        <p className="text-xs uppercase tracking-[0.3em] text-black/40">
-          Opening Studio...
-        </p>
-      </main>
-    );
-  }
 
   return (
-    <main className="min-h-screen bg-[#fffaf2] pb-32 text-black">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8">
-        <header className="flex flex-wrap items-center justify-between gap-4">
+    <main className="min-h-screen bg-[#fffaf2] px-6 py-10 text-black">
+      <div className="mx-auto max-w-7xl">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">
-              VIRAL MINT
-            </p>
-
-            <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
-              emotionally intelligent creator OS
+            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.35em] text-black/40">
+              creator growth subscriptions
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => router.push("/pricing")}
-              className="rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.25em] transition-all duration-500 hover:bg-black hover:text-white"
-            >
-              Pricing
-            </button>
-
-            <button
-              onClick={signOut}
-              className="rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.25em] transition-all duration-500 hover:bg-black hover:text-white"
-            >
-              Logout
-            </button>
-          </div>
+          <Link
+            href="/studio"
+            className="rounded-full border border-black/10 bg-white/60 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+          >
+            Back to Studio
+          </Link>
         </header>
 
-        <section className="flex flex-1 flex-col items-center justify-center py-20 text-center">
-          <p className="mb-5 text-xs uppercase tracking-[0.4em] text-black/35">
-            creator workspace
+        <section className="mt-20 text-center">
+          <p className="text-xs uppercase tracking-[0.45em] text-black/35">
+            CHOOSE YOUR CREATOR PATH
           </p>
 
-          <h1 className="max-w-4xl text-4xl font-light leading-tight tracking-tight md:text-6xl">
-            What do you want to create today?
+          <h1 className="mt-6 text-5xl font-light leading-tight tracking-tight md:text-7xl">
+            Upgrade your creator engine.
           </h1>
 
-          <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
-            Free Usage · {generationCount}/10
+          <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-black/55">
+            Early creator pricing is live. Pick monthly flexibility or annual
+            savings with calm premium creator momentum.
           </p>
 
-          <div className="mt-10 w-full max-w-2xl">
-            <div className="mb-4 flex justify-center gap-2">
-              {["English", "Hindi", "Hinglish"].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setLanguage(item)}
-                  className={
-                    language === item
-                      ? "rounded-full bg-black px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.22)]"
-                      : "rounded-full border border-black/10 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-black/45 transition-all duration-500 hover:bg-black hover:text-white"
-                  }
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <textarea
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="Describe your content idea..."
-              className="min-h-[180px] w-full rounded-[2rem] border border-black/10 bg-white/70 p-6 text-base outline-none backdrop-blur-xl"
-            />
-
+          <div className="mx-auto mt-10 flex w-fit rounded-full border border-black/10 bg-white/75 p-1 shadow-[0_20px_60px_rgba(126,242,194,0.12)] backdrop-blur-xl">
             <button
-              onClick={generateHooks}
-              disabled={loading}
-              className="mt-5 rounded-full bg-black px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.18)] transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.32)] disabled:opacity-40"
+              onClick={() => setBilling("monthly")}
+              className={
+                billing === "monthly"
+                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.22)] transition-all duration-500"
+                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500"
+              }
             >
-              {loading ? "Generating..." : "Generate"}
+              Monthly
             </button>
 
-            <div className="mt-10 grid w-full gap-4 sm:grid-cols-2">
-              {[
-                "Replay Psychology Engine",
-                "Cinematic Story Expansion",
-                "Audience Emotion Map",
-                "Viral Momentum Analyzer",
-              ].map((tool) => (
-                <button
-                  key={tool}
-                  onClick={() => router.push("/pricing")}
-                  className="group relative overflow-hidden rounded-[1.5rem] border border-black/10 bg-gradient-to-br from-white/70 to-[#fff7ea] p-5 text-left transition-all duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[0_15px_45px_rgba(245,199,107,0.22)]"
-                >
-                  <div className="absolute inset-0 backdrop-blur-[2px]" />
-
-                  <div className="relative">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
-                      PRO LOCKED
-                    </p>
-
-                    <h3 className="mt-3 text-lg font-light text-black/70">
-                      {tool}
-                    </h3>
-
-                    <p className="mt-3 text-xs leading-6 text-black/45">
-                      Unlock this premium creator system in Pro.
-                    </p>
-
-                    <p className="mt-5 text-xs uppercase tracking-[0.25em] text-black/40 group-hover:text-black">
-                      Unlock →
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={() => setBilling("annual")}
+              className={
+                billing === "annual"
+                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.22)] transition-all duration-500"
+                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45 transition-all duration-500"
+              }
+            >
+              Annual Save 33%
+            </button>
           </div>
-
-          {(hooks.length > 0 ||
-            titles.length > 0 ||
-            thumbnails.length > 0 ||
-            ctas.length > 0 ||
-            openings.length > 0) && (
-            <div className="mt-14 w-full max-w-3xl space-y-10 text-left">
-              {hooks.length > 0 && <OutputBlock title="Hooks" items={hooks} />}
-              {titles.length > 0 && <OutputBlock title="Titles" items={titles} />}
-              {thumbnails.length > 0 && (
-                <OutputBlock title="Thumbnail Direction" items={thumbnails} />
-              )}
-              {openings.length > 0 && (
-                <OutputBlock title="Opening Sequence" items={openings} />
-              )}
-              {ctas.length > 0 && (
-                <OutputBlock title="Emotional CTA" items={ctas} />
-              )}
-            </div>
-          )}
         </section>
-      </div>
 
-      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex justify-center gap-2">
-            {["English", "Hindi", "Hinglish"].map((item) => (
-              <button
-                key={item}
-                onClick={() => setLanguage(item)}
+        <section className="mt-20 grid gap-8 lg:grid-cols-3">
+          {plans.map((plan) => {
+            const price = getPrice(plan);
+            const total = getBillingTotal(plan);
+            const saving = getSaving(plan);
+
+            return (
+              <div
+                key={plan.name}
                 className={
-                  language === item
-                    ? "rounded-full bg-black px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.22)]"
-                    : "rounded-full border border-black/10 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-black/45 transition-all duration-500 hover:bg-black hover:text-white"
+                  plan.popular
+                    ? "relative rounded-[2.5rem] border border-black bg-black p-10 text-white shadow-[0_28px_90px_rgba(0,0,0,0.22)] transition-all duration-500 hover:-translate-y-1"
+                    : "rounded-[2.5rem] border border-black/10 bg-white/65 p-10 shadow-[0_20px_60px_rgba(126,242,194,0.08)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_25px_75px_rgba(126,242,194,0.16)]"
                 }
               >
-                {item}
-              </button>
-            ))}
-          </div>
+                {plan.popular && (
+                  <div className="absolute right-6 top-6 rounded-full bg-[#7ef2c2] px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-black shadow-[0_8px_25px_rgba(126,242,194,0.28)]">
+                    MOST POPULAR
+                  </div>
+                )}
 
-          <button
-            onClick={generateHooks}
-            disabled={loading || !idea.trim()}
-            className="rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.18)] transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.32)] disabled:opacity-40"
-          >
-            {loading ? "Generating..." : "Generate"}
-          </button>
+                <p
+                  className={
+                    plan.popular
+                      ? "text-xs uppercase tracking-[0.35em] text-white/60"
+                      : "text-xs uppercase tracking-[0.35em] text-black/35"
+                  }
+                >
+                  {plan.name}
+                </p>
 
-          <button
-            onClick={() => router.push("/pricing")}
-            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 transition-all duration-500 hover:bg-black hover:text-white"
+                <div className="mt-6 flex items-end gap-3">
+                  <p
+                    className={
+                      plan.popular
+                        ? "text-xl text-white/35 line-through"
+                        : "text-xl text-black/30 line-through"
+                    }
+                  >
+                    ₹{plan.oldMonthly}
+                  </p>
+
+                  <h2 className="text-5xl font-light">₹{price}</h2>
+                </div>
+
+                <p
+                  className={
+                    plan.popular
+                      ? "mt-2 text-xs uppercase tracking-[0.25em] text-white/50"
+                      : "mt-2 text-xs uppercase tracking-[0.25em] text-black/35"
+                  }
+                >
+                  {billing === "monthly"
+                    ? "per month"
+                    : `per month · billed ₹${total}/year`}
+                </p>
+
+                {billing === "annual" && (
+                  <div
+                    className={
+                      plan.popular
+                        ? "mt-5 rounded-full border border-[#7ef2c2]/30 bg-[#7ef2c2]/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#7ef2c2]"
+                        : "mt-5 rounded-full border border-[#f5c76b]/35 bg-[#fff3d6] px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c]"
+                    }
+                  >
+                    Save ₹{saving}/year
+                  </div>
+                )}
+
+                <div
+                  className={
+                    plan.popular
+                      ? "mt-10 space-y-5 text-sm leading-7 text-white/75"
+                      : "mt-10 space-y-5 text-sm leading-7 text-black/60"
+                  }
+                >
+                  {plan.features.map((feature) => (
+                    <p key={feature}>• {feature}</p>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedPlan(plan.name);
+
+                    setTimeout(() => {
+                      paymentRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }, 100);
+                  }}
+                  className={
+                    plan.popular
+                      ? "mt-12 w-full rounded-full bg-white px-6 py-4 text-xs uppercase tracking-[0.3em] text-black shadow-[0_12px_35px_rgba(126,242,194,0.2)] transition-all duration-500 hover:scale-[1.02] hover:bg-[#7ef2c2]"
+                      : "mt-12 w-full rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white hover:shadow-[0_12px_35px_rgba(126,242,194,0.22)]"
+                  }
+                >
+                  {billing === "monthly"
+                    ? "Pay Monthly"
+                    : "Start Annual Plan"}
+                </button>
+              </div>
+            );
+          })}
+        </section>
+
+        {activePlan && (
+          <section
+            ref={paymentRef}
+            className="mx-auto mt-24 max-w-5xl rounded-[3rem] border border-black/10 bg-white/75 p-8 shadow-[0_25px_80px_rgba(126,242,194,0.14)] backdrop-blur-xl md:p-12"
           >
-            Upgrade
-          </button>
-        </div>
+            <div className="grid gap-10 md:grid-cols-2 md:items-start">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-black/35">
+                  Payment Selected
+                </p>
+
+                <h2 className="mt-5 text-4xl font-light leading-tight">
+                  {activePlan.name} · ₹{getBillingTotal(activePlan)}
+                </h2>
+
+                <p className="mt-4 text-xs uppercase tracking-[0.25em] text-black/40">
+                  {billing === "monthly"
+                    ? "Monthly payment"
+                    : `Annual plan · ₹${getPrice(activePlan)}/mo effective`}
+                </p>
+
+                <p className="mt-5 text-sm leading-8 text-black/55">
+                  Scan the QR to pay. After payment, submit your email,
+                  transaction ID, and any query below for activation.
+                </p>
+
+                <img
+                  src="/upi-qr.png"
+                  alt="UPI QR"
+                  className="mt-8 w-60 rounded-[2rem] border border-black/10 shadow-[0_18px_55px_rgba(245,199,107,0.18)]"
+                />
+
+                <p className="mt-5 text-xs uppercase tracking-[0.3em] text-black/40">
+                  Scan & Pay via UPI
+                </p>
+              </div>
+
+              <form
+                className="rounded-[2rem] border border-black/10 bg-[#fffaf2]/75 p-6 shadow-[0_18px_55px_rgba(0,0,0,0.06)]"
+                onSubmit={submitPaymentQuery}
+              >
+                <p className="text-xs uppercase tracking-[0.35em] text-black/35">
+                  Activation Query
+                </p>
+
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email"
+                  className="mt-6 w-full rounded-full border border-black/10 bg-white/70 px-5 py-4 text-sm outline-none"
+                />
+
+                <input
+                  type="text"
+                  required
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  placeholder="Transaction ID / UTR"
+                  className="mt-4 w-full rounded-full border border-black/10 bg-white/70 px-5 py-4 text-sm outline-none"
+                />
+
+                <textarea
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Any query or note..."
+                  className="mt-4 min-h-32 w-full resize-none rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm outline-none"
+                />
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="mt-6 w-full rounded-full bg-black px-6 py-4 text-xs uppercase tracking-[0.3em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.18)] transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_12px_40px_rgba(126,242,194,0.32)] disabled:opacity-50"
+                >
+                  {submitting ? "Submitting..." : "Submit Query"}
+                </button>
+
+                {success && (
+                  <div className="mt-5 rounded-[1.5rem] border border-[#7ef2c2]/40 bg-[#dffdf1] p-4 text-sm text-[#0f5132] shadow-[0_10px_30px_rgba(126,242,194,0.18)]">
+                    Payment query submitted successfully. Activation will be
+                    processed after verification.
+                  </div>
+                )}
+              </form>
+            </div>
+          </section>
+        )}
       </div>
     </main>
-  );
-}
-
-function OutputBlock({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <p className="mb-4 text-xs uppercase tracking-[0.35em] text-black/35">
-        {title}
-      </p>
-
-      <div className="space-y-4">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="rounded-[1.5rem] border border-black/10 bg-white/60 p-5 text-sm leading-7 text-black/70"
-          >
-            {item}
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
