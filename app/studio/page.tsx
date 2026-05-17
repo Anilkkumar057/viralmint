@@ -129,6 +129,32 @@ export default function StudioPage() {
   };
 
   const loadPlan = async (userId: string, email: string) => {
+    const normalizedEmail = email.toLowerCase();
+    const ownerEmails = ["mystocktradesk@gmail.com"];
+
+    if (ownerEmails.includes(normalizedEmail)) {
+      const { error: ownerSyncError } = await supabase
+        .from("user_profiles")
+        .upsert(
+          {
+            id: userId,
+            email: normalizedEmail,
+            plan: "elite",
+            is_premium: true,
+            is_admin: true,
+            is_locked: false,
+          },
+          { onConflict: "id" }
+        );
+
+      if (ownerSyncError) {
+        console.error("Owner plan sync error:", ownerSyncError);
+      }
+
+      setPlan("elite");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("user_profiles")
       .select("plan, is_premium, is_locked")
@@ -147,7 +173,7 @@ export default function StudioPage() {
         .insert([
           {
             id: userId,
-            email,
+            email: normalizedEmail,
             plan: "free",
             is_premium: false,
             is_locked: false,
@@ -474,53 +500,73 @@ Create deeper, sharper second-layer creator directions.
     );
   }
 
+  const cleanPlan = plan?.toLowerCase() || "free";
+  const isPremiumUser = cleanPlan !== "free";
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Creator";
+
   const usageText =
-    plan === "free"
+    cleanPlan === "free"
       ? `Free Trial · ${generationCount}/10`
-      : `${plan.toUpperCase()} Plan · Unlimited`;
+      : `${cleanPlan.toUpperCase()} Plan · Unlimited`;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-4 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
             <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
-              emotionally intelligent creator os
+              Welcome back, {displayName}
+            </p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.26em] text-black/30">
+              your creator desk is ready
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {plan === "free" ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {cleanPlan === "elite" && (
+              <button
+                onClick={() => router.push("/admin")}
+                className="rounded-full border border-black/10 bg-black px-3 py-2 text-[9px] uppercase tracking-[0.22em] text-white shadow-[0_8px_24px_rgba(0,0,0,0.16)] hover:bg-black/80"
+              >
+                Admin
+              </button>
+            )}
+
+            {cleanPlan === "free" ? (
               <button
                 onClick={() => router.push("/pricing")}
-                className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
+                className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-3 py-2 text-[9px] uppercase tracking-[0.22em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
               >
-                ✦ Upgrade
+                Upgrade
               </button>
             ) : (
-              <div className="rounded-full border border-[#7ef2c2]/40 bg-[#effff7] px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#147a52] shadow-[0_8px_24px_rgba(126,242,194,0.18)]">
-                ✦ {plan} active
+              <div className="rounded-full border border-[#7ef2c2]/40 bg-[#effff7] px-3 py-2 text-[9px] uppercase tracking-[0.22em] text-[#147a52] shadow-[0_8px_24px_rgba(126,242,194,0.18)]">
+                {cleanPlan} active
               </div>
             )}
 
             <button
               onClick={() => router.push("/onboarding")}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+              className="rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[9px] uppercase tracking-[0.22em] hover:bg-black hover:text-white"
             >
-              Edit DNA
+              DNA
             </button>
 
             <button
               onClick={loadVault}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+              className="rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[9px] uppercase tracking-[0.22em] hover:bg-black hover:text-white"
             >
-              {vaultLoading ? "Loading..." : "Vault"}
+              {vaultLoading ? "..." : "Vault"}
             </button>
 
             <button
               onClick={signOut}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
+              className="rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[9px] uppercase tracking-[0.22em] hover:bg-black hover:text-white"
             >
               Logout
             </button>
@@ -528,7 +574,7 @@ Create deeper, sharper second-layer creator directions.
         </header>
 
         <div className="mt-8 animate-fade-rise">
-          <PremiumToolsCard isPremium={plan !== "free"} />
+          <PremiumToolsCard isPremium={isPremiumUser} />
         </div>
 
         {vaultOpen && (
