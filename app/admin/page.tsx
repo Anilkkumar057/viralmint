@@ -1,12 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+
+type UserProfile = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  plan: string | null;
+  is_premium: boolean | null;
+  is_admin: boolean | null;
+  is_locked: boolean | null;
+  creator_dna: unknown | null;
+  message_count: number | null;
+  approved_at: string | null;
+  created_at: string | null;
+};
+
+type UserProfileUpdates = Partial<Pick<UserProfile, "is_premium" | "is_locked" | "plan" | "approved_at">>;
+import { supabase } from "../../lib/supabase";
 
 export default function AdminApprovalDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
@@ -55,7 +71,7 @@ export default function AdminApprovalDashboard() {
     setLoading(false);
   }
 
-  async function updateUser(id, updates) {
+  async function updateUser(id: string, updates: UserProfileUpdates) {
     setStatus("Updating...");
 
     const { error } = await supabase
@@ -75,7 +91,7 @@ export default function AdminApprovalDashboard() {
     setStatus("Updated successfully.");
   }
 
-  async function approveUser(id, plan = "pro") {
+  async function approveUser(id: string, plan = "pro") {
     await updateUser(id, {
       is_premium: true,
       is_locked: false,
@@ -84,7 +100,7 @@ export default function AdminApprovalDashboard() {
     });
   }
 
-  async function rejectUser(id) {
+  async function rejectUser(id: string) {
     await updateUser(id, {
       is_premium: false,
       plan: "free",
@@ -92,7 +108,7 @@ export default function AdminApprovalDashboard() {
     });
   }
 
-  async function lockUser(id, value) {
+  async function lockUser(id: string, value: boolean) {
     await updateUser(id, {
       is_locked: value,
     });
