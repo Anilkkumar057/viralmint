@@ -384,7 +384,9 @@ export default function StudioPage() {
           <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
             Free Usage · {generationCount}/10
           </p>
-
+          <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
+          Creative Flow · Day {streakCount}
+          </p>
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
             Creative Flow · Day {streakCount}
           </p>
