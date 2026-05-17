@@ -37,9 +37,7 @@ export default function StudioPage() {
   const [idea, setIdea] = useState("");
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("Hinglish");
-
   const [result, setResult] = useState<ResultState>(emptyResult);
-
   const [generationCount, setGenerationCount] = useState(0);
 
   const [vaultOpen, setVaultOpen] = useState(false);
@@ -57,30 +55,26 @@ export default function StudioPage() {
       }
 
       setUser(data.user);
-      await loadUsage(data.user.id);
-
       setAuthChecking(false);
+      loadUsage(data.user.id);
     };
 
     checkUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         if (!session?.user) {
           router.push("/");
           return;
         }
 
         setUser(session.user);
-        await loadUsage(session.user.id);
-
         setAuthChecking(false);
+        loadUsage(session.user.id);
       }
     );
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, [router]);
 
   const loadUsage = async (userId: string) => {
@@ -92,12 +86,8 @@ export default function StudioPage() {
 
     if (!data) {
       await supabase.from("usage_limits").insert([
-        {
-          user_id: userId,
-          generation_count: 0,
-        },
+        { user_id: userId, generation_count: 0 },
       ]);
-
       setGenerationCount(0);
       return;
     }
@@ -109,21 +99,15 @@ export default function StudioPage() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
-
     setGenerationCount(nextCount);
 
     await supabase
       .from("usage_limits")
-      .update({
-        generation_count: nextCount,
-      })
+      .update({ generation_count: nextCount })
       .eq("user_id", user.id);
   };
 
-  const saveGeneration = async (
-    prompt: string,
-    generatedResult: ResultState
-  ) => {
+  const saveGeneration = async (prompt: string, generatedResult: ResultState) => {
     if (!user) return;
 
     await supabase.from("generations").insert([
@@ -147,9 +131,7 @@ export default function StudioPage() {
       .order("created_at", { ascending: false })
       .limit(20);
 
-    if (data) {
-      setVaultItems(data as VaultItem[]);
-    }
+    if (data) setVaultItems(data as VaultItem[]);
 
     setVaultOpen(true);
     setVaultLoading(false);
@@ -187,18 +169,12 @@ export default function StudioPage() {
 
   const copyText = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
-
     setCopiedKey(key);
-
-    setTimeout(() => {
-      setCopiedKey("");
-    }, 1200);
+    setTimeout(() => setCopiedKey(""), 1200);
   };
 
   const generateHooks = async () => {
     if (!idea.trim()) return;
-
-    console.log("Generation Count:", generationCount);
 
     if (generationCount >= 999) {
       router.push("/pricing");
@@ -210,13 +186,8 @@ export default function StudioPage() {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: idea,
-          language,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: idea, language }),
       });
 
       const data = await response.json();
@@ -230,9 +201,7 @@ export default function StudioPage() {
       };
 
       setResult(generatedResult);
-
       await saveGeneration(idea, generatedResult);
-
       await updateUsage();
     } catch (error) {
       console.error(error);
@@ -243,13 +212,12 @@ export default function StudioPage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-
     router.push("/");
   };
 
   if (authChecking) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#fffaf2]">
+      <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_20%_10%,rgba(126,242,194,0.25),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(245,199,107,0.22),transparent_28%),#fffaf2] text-black">
         <p className="text-xs uppercase tracking-[0.3em] text-black/40">
           Opening Studio...
         </p>
@@ -258,87 +226,60 @@ export default function StudioPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fffaf2] pb-32 text-black">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8">
-        <header className="flex flex-wrap items-center justify-between gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/50 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">
-              VIRAL MINT
-            </p>
-
+            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
               emotionally intelligent creator OS
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={loadVault}
-              className="rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.25em] transition-all duration-500 hover:bg-black hover:text-white"
-            >
+            <button onClick={loadVault} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
               {vaultLoading ? "Loading..." : "Vault"}
             </button>
 
-            <button
-              onClick={() => router.push("/pricing")}
-              className="rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.25em] transition-all duration-500 hover:bg-black hover:text-white"
-            >
+            <button onClick={() => router.push("/pricing")} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
               Pricing
             </button>
 
-            <button
-              onClick={signOut}
-              className="rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.25em] transition-all duration-500 hover:bg-black hover:text-white"
-            >
+            <button onClick={signOut} className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white">
               Logout
             </button>
           </div>
         </header>
 
         {vaultOpen && (
-          <section className="mt-10 rounded-[2rem] border border-black/10 bg-white/60 p-6 backdrop-blur-xl">
+          <section className="mt-10 rounded-[2rem] border border-black/10 bg-white/65 p-6 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl">
             <div className="mb-5 flex items-center justify-between">
               <p className="text-xs uppercase tracking-[0.35em] text-black/40">
                 Saved Vault
               </p>
 
-              <button
-                onClick={() => setVaultOpen(false)}
-                className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black"
-              >
+              <button onClick={() => setVaultOpen(false)} className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black">
                 Close
               </button>
             </div>
 
             {vaultItems.length === 0 ? (
-              <p className="text-sm text-black/50">
-                No saved generations yet.
-              </p>
+              <p className="text-sm text-black/50">No saved generations yet.</p>
             ) : (
               <div className="space-y-4">
                 {vaultItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 transition-all duration-500 hover:bg-white"
-                  >
-                    <button
-                      onClick={() => useVaultItem(item)}
-                      className="w-full text-left"
-                    >
+                  <div key={item.id} className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white">
+                    <button onClick={() => useVaultItem(item)} className="w-full text-left">
                       <p className="mb-3 text-xs uppercase tracking-[0.25em] text-black/35">
                         {new Date(item.created_at).toLocaleDateString()}
                       </p>
-
                       <p className="text-sm font-medium text-black/70">
                         {item.prompt}
                       </p>
                     </button>
 
                     <div className="mt-4 flex justify-end">
-                      <button
-                        onClick={() => deleteVaultItem(item.id)}
-                        className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500"
-                      >
+                      <button onClick={() => deleteVaultItem(item.id)} className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500">
                         Delete
                       </button>
                     </div>
@@ -362,23 +303,20 @@ export default function StudioPage() {
             Free Usage · {generationCount}/10
           </p>
 
-          <div className="mt-10 w-full max-w-2xl">
-            <LanguageToggle
-              language={language}
-              setLanguage={setLanguage}
-            />
+          <div className="mt-10 w-full max-w-2xl rounded-[2.5rem] border border-black/10 bg-white/55 p-5 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
+            <LanguageToggle language={language} setLanguage={setLanguage} />
 
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               placeholder="Describe your content idea..."
-              className="min-h-[180px] w-full rounded-[2rem] border border-black/10 bg-white/70 p-6 text-base outline-none backdrop-blur-xl"
+              className="min-h-[180px] w-full rounded-[2rem] border border-black/10 bg-white/80 p-6 text-base outline-none backdrop-blur-xl"
             />
 
             <button
               onClick={generateHooks}
               disabled={loading}
-              className="mt-5 rounded-full bg-black px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.18)] transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.32)] disabled:opacity-40"
+              className="mt-5 rounded-full bg-black px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.25)] hover:scale-[1.03] hover:shadow-[0_14px_50px_rgba(126,242,194,0.40)] disabled:opacity-40"
             >
               {loading ? "Generating..." : "Generate"}
             </button>
@@ -393,10 +331,8 @@ export default function StudioPage() {
                 <button
                   key={tool}
                   onClick={() => router.push("/pricing")}
-                  className="group relative overflow-hidden rounded-[1.5rem] border border-black/10 bg-gradient-to-br from-white/70 to-[#fff7ea] p-5 text-left transition-all duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[0_15px_45px_rgba(245,199,107,0.22)]"
+                  className="group relative overflow-hidden rounded-[1.5rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-5 text-left hover:-translate-y-1 hover:shadow-[0_18px_55px_rgba(245,199,107,0.25)]"
                 >
-                  <div className="absolute inset-0 backdrop-blur-[2px]" />
-
                   <div className="relative">
                     <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
                       PRO LOCKED
@@ -425,70 +361,29 @@ export default function StudioPage() {
             result.ctas.length > 0 ||
             result.openings.length > 0) && (
             <div className="mt-14 w-full max-w-3xl space-y-10 text-left">
-              <OutputBlock
-                title="Hooks"
-                items={result.hooks}
-                copiedKey={copiedKey}
-                copyText={copyText}
-                section="hooks"
-              />
-
-              <OutputBlock
-                title="Titles"
-                items={result.titles}
-                copiedKey={copiedKey}
-                copyText={copyText}
-                section="titles"
-              />
-
-              <OutputBlock
-                title="Thumbnail Direction"
-                items={result.thumbnails}
-                copiedKey={copiedKey}
-                copyText={copyText}
-                section="thumbnails"
-              />
-
-              <OutputBlock
-                title="Opening Sequence"
-                items={result.openings}
-                copiedKey={copiedKey}
-                copyText={copyText}
-                section="openings"
-              />
-
-              <OutputBlock
-                title="Emotional CTA"
-                items={result.ctas}
-                copiedKey={copiedKey}
-                copyText={copyText}
-                section="ctas"
-              />
+              <OutputBlock title="Hooks" items={result.hooks} copiedKey={copiedKey} copyText={copyText} section="hooks" />
+              <OutputBlock title="Titles" items={result.titles} copiedKey={copiedKey} copyText={copyText} section="titles" />
+              <OutputBlock title="Thumbnail Direction" items={result.thumbnails} copiedKey={copiedKey} copyText={copyText} section="thumbnails" />
+              <OutputBlock title="Opening Sequence" items={result.openings} copiedKey={copiedKey} copyText={copyText} section="openings" />
+              <OutputBlock title="Emotional CTA" items={result.ctas} copiedKey={copiedKey} copyText={copyText} section="ctas" />
             </div>
           )}
         </section>
       </div>
 
-      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_70px_rgba(126,242,194,0.18)] backdrop-blur-xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <LanguageToggle
-            language={language}
-            setLanguage={setLanguage}
-            compact
-          />
+          <LanguageToggle language={language} setLanguage={setLanguage} compact />
 
           <button
             onClick={generateHooks}
             disabled={loading || !idea.trim()}
-            className="rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.18)] transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.32)] disabled:opacity-40"
+            className="rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.36)] disabled:opacity-40"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
 
-          <button
-            onClick={() => router.push("/pricing")}
-            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 transition-all duration-500 hover:bg-black hover:text-white"
-          >
+          <button onClick={() => router.push("/pricing")} className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 hover:bg-black hover:text-white">
             Upgrade
           </button>
         </div>
@@ -507,21 +402,15 @@ function LanguageToggle({
   compact?: boolean;
 }) {
   return (
-    <div
-      className={
-        compact
-          ? "flex justify-center gap-2"
-          : "mb-4 flex justify-center gap-2"
-      }
-    >
+    <div className={compact ? "flex justify-center gap-2" : "mb-4 flex justify-center gap-2"}>
       {["English", "Hindi", "Hinglish"].map((item) => (
         <button
           key={item}
           onClick={() => setLanguage(item)}
           className={
             language === item
-              ? "rounded-full bg-black px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.22)]"
-              : "rounded-full border border-black/10 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-black/45 transition-all duration-500 hover:bg-black hover:text-white"
+              ? "rounded-full bg-black px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.28)]"
+              : "rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-black/45 hover:bg-black hover:text-white"
           }
         >
           {item}
@@ -557,16 +446,10 @@ function OutputBlock({
           const key = `${section}-${index}`;
 
           return (
-            <div
-              key={key}
-              className="rounded-[1.5rem] border border-black/10 bg-white/60 p-5 text-sm leading-7 text-black/70"
-            >
+            <div key={key} className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)] backdrop-blur-xl">
               <p>{item}</p>
 
-              <button
-                onClick={() => copyText(item, key)}
-                className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black"
-              >
+              <button onClick={() => copyText(item, key)} className="mt-4 text-[10px] uppercase tracking-[0.25em] text-black/35 hover:text-black">
                 {copiedKey === key ? "Copied" : "Copy"}
               </button>
             </div>
