@@ -60,6 +60,7 @@ export default function StudioPage() {
 
       setUser(data.user);
       setAuthChecking(false);
+
       loadUsage(data.user.id);
       loadStreak(data.user.id);
     };
@@ -75,6 +76,7 @@ export default function StudioPage() {
 
         setUser(session.user);
         setAuthChecking(false);
+
         loadUsage(session.user.id);
         loadStreak(session.user.id);
       }
@@ -92,8 +94,12 @@ export default function StudioPage() {
 
     if (!data) {
       await supabase.from("usage_limits").insert([
-        { user_id: userId, generation_count: 0 },
+        {
+          user_id: userId,
+          generation_count: 0,
+        },
       ]);
+
       setGenerationCount(0);
       return;
     }
@@ -105,11 +111,14 @@ export default function StudioPage() {
     if (!user) return;
 
     const nextCount = generationCount + 1;
+
     setGenerationCount(nextCount);
 
     await supabase
       .from("usage_limits")
-      .update({ generation_count: nextCount })
+      .update({
+        generation_count: nextCount,
+      })
       .eq("user_id", user.id);
   };
 
@@ -129,8 +138,6 @@ export default function StudioPage() {
         },
       ]);
 
-      setStreakCount(0);
-      setLastGenerationDate("");
       return;
     }
 
@@ -147,6 +154,7 @@ export default function StudioPage() {
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
+
     const yesterdayText = yesterday.toISOString().slice(0, 10);
 
     const nextStreak =
@@ -189,7 +197,9 @@ export default function StudioPage() {
       .order("created_at", { ascending: false })
       .limit(20);
 
-    if (data) setVaultItems(data as VaultItem[]);
+    if (data) {
+      setVaultItems(data as VaultItem[]);
+    }
 
     setVaultOpen(true);
     setVaultLoading(false);
@@ -201,34 +211,20 @@ export default function StudioPage() {
     try {
       setResult(JSON.parse(item.result));
     } catch {
-      setResult({
-        hooks: item.result.split("\n\n"),
-        titles: [],
-        thumbnails: [],
-        ctas: [],
-        openings: [],
-      });
+      setResult(emptyResult);
     }
 
     setVaultOpen(false);
   };
 
-  const deleteVaultItem = async (id: string) => {
-    if (!user) return;
-
-    setVaultItems((prev) => prev.filter((item) => item.id !== id));
-
-    await supabase
-      .from("generations")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", user.id);
-  };
-
   const copyText = async (text: string, key: string) => {
     await navigator.clipboard.writeText(text);
+
     setCopiedKey(key);
-    setTimeout(() => setCopiedKey(""), 1200);
+
+    setTimeout(() => {
+      setCopiedKey("");
+    }, 1200);
   };
 
   const generateHooks = async () => {
@@ -244,8 +240,13 @@ export default function StudioPage() {
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: idea, language }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: idea,
+          language,
+        }),
       });
 
       const data = await response.json();
@@ -261,7 +262,9 @@ export default function StudioPage() {
       setResult(generatedResult);
 
       await saveGeneration(idea, generatedResult);
+
       await updateUsage();
+
       await updateStreak();
     } catch (error) {
       console.error(error);
@@ -272,12 +275,13 @@ export default function StudioPage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+
     router.push("/");
   };
 
   if (authChecking) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_20%_10%,rgba(126,242,194,0.25),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(245,199,107,0.22),transparent_28%),#fffaf2] text-black">
+      <main className="flex min-h-screen items-center justify-center text-black">
         <p className="text-xs uppercase tracking-[0.3em] text-black/40">
           Opening Studio...
         </p>
@@ -286,29 +290,32 @@ export default function StudioPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-32 text-black">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/50 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] pb-20 text-black">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_60px_rgba(126,242,194,0.10)] backdrop-blur-xl">
           <div>
-            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
+            <p className="text-lg font-light tracking-[0.35em]">
+              VIRAL MINT
+            </p>
+
             <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-black/40">
-              emotionally intelligent creator OS
+              emotionally intelligent creator os
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
+              onClick={() => router.push("/pricing")}
+              className="rounded-full border border-[#f5c76b]/40 bg-[#fff3d6]/80 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c] shadow-[0_8px_24px_rgba(245,199,107,0.18)] hover:bg-[#f5c76b] hover:text-black"
+            >
+              ✦ Upgrade
+            </button>
+
+            <button
               onClick={loadVault}
               className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
             >
               {vaultLoading ? "Loading..." : "Vault"}
-            </button>
-
-            <button
-              onClick={() => router.push("/pricing")}
-              className="rounded-full border border-black/10 bg-white/60 px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white"
-            >
-              Pricing
             </button>
 
             <button
@@ -320,96 +327,45 @@ export default function StudioPage() {
           </div>
         </header>
 
-        {vaultOpen && (
-          <section className="mt-10 rounded-[2rem] border border-black/10 bg-white/65 p-6 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.35em] text-black/40">
-                Saved Vault
-              </p>
-
-              <button
-                onClick={() => setVaultOpen(false)}
-                className="text-xs uppercase tracking-[0.25em] text-black/40 hover:text-black"
-              >
-                Close
-              </button>
-            </div>
-
-            {vaultItems.length === 0 ? (
-              <p className="text-sm text-black/50">No saved generations yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {vaultItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-[1.5rem] border border-black/10 bg-[#fffaf2]/70 p-5 hover:bg-white"
-                  >
-                    <button
-                      onClick={() => useVaultItem(item)}
-                      className="w-full text-left"
-                    >
-                      <p className="mb-3 text-xs uppercase tracking-[0.25em] text-black/35">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </p>
-
-                      <p className="text-sm font-medium text-black/70">
-                        {item.prompt}
-                      </p>
-                    </button>
-
-                    <div className="mt-4 flex justify-end">
-                      <button
-                        onClick={() => deleteVaultItem(item.id)}
-                        className="text-[10px] uppercase tracking-[0.25em] text-black/30 hover:text-red-500"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
         <section className="flex flex-1 flex-col items-center justify-center py-20 text-center">
           <p className="mb-5 text-xs uppercase tracking-[0.4em] text-black/35">
             creator workspace
           </p>
 
-          <h1 className="max-w-4xl text-4xl font-light leading-tight tracking-tight md:text-6xl">
+          <h1 className="max-w-4xl text-4xl font-light leading-tight tracking-tight md:text-7xl">
             What do you want to create today?
           </h1>
 
           <p className="mt-6 text-xs uppercase tracking-[0.25em] text-black/35">
             Free Usage · {generationCount}/10
           </p>
-          <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
-          Creative Flow · Day {streakCount}
-          </p>
+
           <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8a641c]">
             Creative Flow · Day {streakCount}
           </p>
 
-          <div className="mt-10 w-full max-w-2xl rounded-[2.5rem] border border-black/10 bg-white/55 p-5 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
-            <LanguageToggle language={language} setLanguage={setLanguage} />
+          <div className="mt-10 w-full max-w-3xl rounded-[2.5rem] border border-black/10 bg-white/55 p-6 shadow-[0_25px_80px_rgba(126,242,194,0.12)] backdrop-blur-xl">
+            <LanguageToggle
+              language={language}
+              setLanguage={setLanguage}
+            />
 
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               placeholder="Describe your content idea..."
-              className="min-h-[180px] w-full rounded-[2rem] border border-black/10 bg-white/80 p-6 text-base outline-none backdrop-blur-xl"
+              className="min-h-[200px] w-full rounded-[2rem] border border-black/10 bg-white/80 p-6 text-base outline-none"
             />
 
             <button
               onClick={generateHooks}
               disabled={loading}
-              className="mt-5 rounded-full bg-black px-8 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.25)] hover:scale-[1.03] hover:shadow-[0_14px_50px_rgba(126,242,194,0.40)] disabled:opacity-40"
+              className="mt-6 rounded-full bg-black px-10 py-4 text-sm uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.25)] hover:scale-[1.03] hover:shadow-[0_14px_50px_rgba(126,242,194,0.40)] disabled:opacity-40"
             >
               {loading ? "Generating..." : "Generate"}
             </button>
 
-            <div className="mt-10 grid w-full gap-4 sm:grid-cols-2">
+            <div className="mt-12 grid gap-5 md:grid-cols-2">
               {[
                 "Replay Psychology Engine",
                 "Cinematic Story Expansion",
@@ -419,22 +375,18 @@ export default function StudioPage() {
                 <button
                   key={tool}
                   onClick={() => router.push("/pricing")}
-                  className="group relative overflow-hidden rounded-[1.5rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-5 text-left hover:-translate-y-1 hover:shadow-[0_18px_55px_rgba(245,199,107,0.25)]"
+                  className="rounded-[1.7rem] border border-black/10 bg-gradient-to-br from-white/80 to-[#fff3d6] p-6 text-left transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(245,199,107,0.25)]"
                 >
                   <p className="text-[10px] uppercase tracking-[0.3em] text-[#c49b43]">
                     PRO LOCKED
                   </p>
 
-                  <h3 className="mt-3 text-lg font-light text-black/70">
+                  <h3 className="mt-4 text-lg font-light text-black/70">
                     {tool}
                   </h3>
 
-                  <p className="mt-3 text-xs leading-6 text-black/45">
+                  <p className="mt-3 text-sm leading-7 text-black/45">
                     Unlock this premium creator system in Pro.
-                  </p>
-
-                  <p className="mt-5 text-xs uppercase tracking-[0.25em] text-black/40 group-hover:text-black">
-                    Unlock →
                   </p>
                 </button>
               ))}
@@ -446,7 +398,7 @@ export default function StudioPage() {
             result.thumbnails.length > 0 ||
             result.ctas.length > 0 ||
             result.openings.length > 0) && (
-            <div className="mt-14 w-full max-w-3xl space-y-10 text-left">
+            <div className="mt-16 w-full max-w-4xl space-y-10 text-left">
               <OutputBlock
                 title="Hooks"
                 items={result.hooks}
@@ -468,7 +420,7 @@ export default function StudioPage() {
                 items={result.thumbnails}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="thumbnails"
+                section="thumb"
               />
 
               <OutputBlock
@@ -476,7 +428,7 @@ export default function StudioPage() {
                 items={result.openings}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="openings"
+                section="open"
               />
 
               <OutputBlock
@@ -484,32 +436,11 @@ export default function StudioPage() {
                 items={result.ctas}
                 copiedKey={copiedKey}
                 copyText={copyText}
-                section="ctas"
+                section="cta"
               />
             </div>
           )}
         </section>
-      </div>
-
-      <div className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 rounded-[2rem] border border-black/10 bg-white/80 p-3 shadow-[0_20px_70px_rgba(126,242,194,0.18)] backdrop-blur-xl">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <LanguageToggle language={language} setLanguage={setLanguage} compact />
-
-          <button
-            onClick={generateHooks}
-            disabled={loading || !idea.trim()}
-            className="rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(126,242,194,0.36)] disabled:opacity-40"
-          >
-            {loading ? "Generating..." : "Generate"}
-          </button>
-
-          <button
-            onClick={() => router.push("/pricing")}
-            className="rounded-full border border-black/10 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/55 hover:bg-black hover:text-white"
-          >
-            Upgrade
-          </button>
-        </div>
       </div>
     </main>
   );
@@ -518,26 +449,20 @@ export default function StudioPage() {
 function LanguageToggle({
   language,
   setLanguage,
-  compact = false,
 }: {
   language: string;
   setLanguage: (value: string) => void;
-  compact?: boolean;
 }) {
   return (
-    <div
-      className={
-        compact ? "flex justify-center gap-2" : "mb-4 flex justify-center gap-2"
-      }
-    >
+    <div className="mb-5 flex justify-center gap-2">
       {["English", "Hindi", "Hinglish"].map((item) => (
         <button
           key={item}
           onClick={() => setLanguage(item)}
           className={
             language === item
-              ? "rounded-full bg-black px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.28)]"
-              : "rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-black/45 hover:bg-black hover:text-white"
+              ? "rounded-full bg-black px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-white"
+              : "rounded-full border border-black/10 bg-white/60 px-4 py-2 text-[10px] uppercase tracking-[0.18em] text-black/45 hover:bg-black hover:text-white"
           }
         >
           {item}
@@ -575,7 +500,7 @@ function OutputBlock({
           return (
             <div
               key={key}
-              className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)] backdrop-blur-xl"
+              className="rounded-[1.5rem] border border-black/10 bg-white/70 p-5 text-sm leading-7 text-black/70 shadow-[0_12px_40px_rgba(126,242,194,0.08)]"
             >
               <p>{item}</p>
 
