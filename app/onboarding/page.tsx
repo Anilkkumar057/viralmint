@@ -52,15 +52,34 @@ export default function OnboardingPage() {
   const progress = Math.round((completedSteps / 4) * 100);
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkUserAndLoadExistingDNA = async () => {
       const { data } = await supabase.auth.getUser();
 
       if (!data.user) {
         router.push("/");
+        return;
+      }
+
+      const { data: existingProfile, error } = await supabase
+        .from("creator_profiles")
+        .select("*")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Creator DNA load error:", error);
+        return;
+      }
+
+      if (existingProfile) {
+        setNiche(existingProfile.niche || "");
+        setPlatform(existingProfile.platform || existingProfile.main_platform || "");
+        setStyle(existingProfile.style || existingProfile.creator_style || "");
+        setGoal(existingProfile.goal || existingProfile.emotional_preference || "");
       }
     };
 
-    checkUser();
+    checkUserAndLoadExistingDNA();
   }, [router]);
 
   const completeOnboarding = async () => {
@@ -74,6 +93,7 @@ export default function OnboardingPage() {
     const { data } = await supabase.auth.getUser();
 
     if (!data.user) {
+      setLoading(false);
       router.push("/");
       return;
     }
@@ -83,8 +103,11 @@ export default function OnboardingPage() {
         user_id: data.user.id,
         niche,
         platform,
+        main_platform: platform,
         style,
+        creator_style: style,
         goal,
+        emotional_preference: goal,
       },
       { onConflict: "user_id" }
     );
@@ -92,6 +115,7 @@ export default function OnboardingPage() {
     setLoading(false);
 
     if (error) {
+      console.error("Creator DNA save error:", error);
       alert("Creator DNA save failed. Check Supabase creator_profiles table/RLS.");
       return;
     }
@@ -118,14 +142,24 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
-            {completedSteps}/4 Complete
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
+              {completedSteps}/4 Complete
+            </div>
+
+            <button
+              onClick={() => router.push("/studio")}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm text-white/70 transition-all hover:border-yellow-400/30 hover:text-yellow-200"
+            >
+              Skip to Studio
+            </button>
           </div>
         </header>
 
         <section className="grid gap-8 pt-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <aside className="relative overflow-hidden rounded-[2.4rem] border border-yellow-400/22 bg-[#090807] p-8 shadow-[0_30px_120px_rgba(255,208,74,0.08)]">
             <div className="absolute right-[-120px] top-[-80px] h-[360px] w-[360px] rounded-full bg-yellow-400/10 blur-3xl" />
+
             <div className="relative z-10">
               <p className="text-[11px] font-black uppercase tracking-[0.4em] text-yellow-300">
                 Train Your AI
@@ -137,8 +171,8 @@ export default function OnboardingPage() {
               </h1>
 
               <p className="mt-6 text-base leading-8 text-white/62">
-                Viral Mint will adapt to your niche, platform, content style,
-                and audience goal so every output feels made for you.
+                Viral Mint adapts to your niche, platform, content style, and
+                audience goal so every output feels made for you.
               </p>
 
               <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5">

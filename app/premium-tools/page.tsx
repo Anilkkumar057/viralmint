@@ -1,89 +1,172 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
 
-const premiumTools = [
+type UserProfile = {
+  plan?: string | null;
+  is_premium?: boolean | null;
+};
+
+const tools = [
   {
     title: "Hook Generator",
-    desc: "Generate emotionally addictive hooks in seconds.",
+    desc: "Create emotionally addictive hooks instantly.",
     icon: "⚡",
-    glow: "from-yellow-300 to-yellow-500",
+    locked: false,
   },
   {
     title: "Thumbnail Brain",
-    desc: "Get high CTR thumbnail concepts instantly.",
+    desc: "High CTR thumbnail psychology engine.",
     icon: "▧",
-    glow: "from-amber-300 to-orange-500",
+    locked: false,
   },
   {
     title: "Script Engine",
-    desc: "Create cinematic scripts with creator psychology.",
+    desc: "Cinematic storytelling system.",
     icon: "▤",
-    glow: "from-yellow-200 to-yellow-400",
-  },
-  {
-    title: "Hashtag Finder",
-    desc: "Find trend-ready hashtags for maximum reach.",
-    icon: "#",
-    glow: "from-orange-300 to-yellow-500",
+    locked: false,
   },
   {
     title: "Emotion CTA",
-    desc: "Generate emotional CTAs that increase engagement.",
+    desc: "Generate emotional CTAs that convert.",
     icon: "♡",
-    glow: "from-yellow-200 to-amber-400",
+    locked: true,
   },
   {
     title: "Repurpose Pack",
-    desc: "Turn one idea into reels, shorts, captions & more.",
+    desc: "Turn one idea into shorts, reels & posts.",
     icon: "↻",
-    glow: "from-yellow-300 to-orange-400",
+    locked: true,
+  },
+  {
+    title: "Audience Psychology",
+    desc: "Decode why people stay and engage.",
+    icon: "◉",
+    locked: true,
   },
 ];
 
 export default function PremiumToolsPage() {
-  const [language, setLanguage] = useState("Hinglish");
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [plan, setPlan] = useState("free");
+  const [userName, setUserName] = useState("Creator");
+
+  const cleanPlan = useMemo(() => {
+    return (plan || "free").toLowerCase();
+  }, [plan]);
+
+  const isPremium = cleanPlan !== "free";
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/");
+      return;
+    }
+
+    const name =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Creator";
+
+    setUserName(String(name).split(" ")[0]);
+
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("plan,is_premium")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const profile = data as UserProfile | null;
+
+    if (profile?.is_premium && profile?.plan) {
+      setPlan(profile.plan);
+    } else {
+      setPlan("free");
+    }
+
+    setLoading(false);
+  };
+
+  const openTool = (tool: string, locked: boolean) => {
+    if (locked && !isPremium) {
+      router.push("/pricing");
+      return;
+    }
+
+    alert(`${tool} launching soon.`);
+  };
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
+        <div className="rounded-[2rem] border border-yellow-400/20 bg-yellow-400/10 p-8 text-center">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-yellow-300">
+            Premium Creator Engine
+          </p>
+
+          <h1 className="mt-4 text-3xl font-black">
+            Loading Tools...
+          </h1>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
 
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(255,208,74,0.13),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(255,214,92,0.08),transparent_25%),linear-gradient(180deg,#050505_0%,#090807_55%,#050505_100%)]" />
 
-      <div className="relative mx-auto max-w-7xl px-5 py-6">
+      <div className="relative mx-auto max-w-7xl px-5 py-8">
 
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-yellow-400/15 bg-black/40 px-6 py-5 backdrop-blur-2xl">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-yellow-400/12 bg-black/40 px-6 py-5 backdrop-blur-2xl">
 
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.4em] text-yellow-300">
-              VIRAL MINT
-            </p>
+          <div className="flex items-center gap-3">
 
-            <h1 className="mt-3 text-3xl font-black">
-              Premium Creator Tools
-            </h1>
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-yellow-300 to-yellow-600 text-xl font-black text-black shadow-[0_0_40px_rgba(255,208,74,0.24)]">
+              M
+            </div>
 
-            <p className="mt-2 text-sm text-white/55">
-              Elite creator intelligence systems for viral growth.
-            </p>
+            <div>
+              <p className="text-xl font-black tracking-wide">
+                VIRAL MINT
+              </p>
+
+              <p className="text-[10px] uppercase tracking-[0.3em] text-yellow-300">
+                Premium Creator Tools
+              </p>
+            </div>
+
           </div>
 
           <div className="flex items-center gap-3">
 
-            <div className="rounded-full border border-yellow-400/40 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
-              ♕ Elite Active
+            <div className="rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
+              ♕ {cleanPlan === "free" ? "Free Active" : `${cleanPlan} Active`}
             </div>
 
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white outline-none"
+            <button
+              onClick={() => router.push("/studio")}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm text-white/70 transition-all hover:border-yellow-400/30 hover:text-yellow-200"
             >
-              <option>English</option>
-              <option>हिन्दी</option>
-              <option>Hinglish</option>
-            </select>
+              Back to Studio
+            </button>
 
           </div>
+
         </header>
 
         <section className="relative mt-8 overflow-hidden rounded-[2.3rem] border border-yellow-400/25 bg-[#090807] p-8 shadow-[0_30px_120px_rgba(255,208,74,0.08)]">
@@ -96,91 +179,115 @@ export default function PremiumToolsPage() {
               Elite Creator Engine
             </p>
 
-            <h2 className="mt-5 text-5xl font-black leading-[1.05] tracking-tight md:text-6xl">
-              Build viral content with
+            <h1 className="mt-5 text-5xl font-black leading-[1.05] tracking-tight md:text-6xl">
+              Welcome back,
               <span className="block text-yellow-300">
-                emotional intelligence.
+                {userName} ♕
               </span>
-            </h2>
+            </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/62">
-              Hooks, thumbnails, scripts, hashtags, emotional CTAs, creator psychology,
-              repurpose systems, and cinematic content tools designed to keep audiences engaged.
+              Premium creator systems for hooks, thumbnails,
+              scripts, emotional psychology, audience retention,
+              and cinematic content growth.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
 
-              <button className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-7 py-4 text-sm font-black text-black shadow-[0_18px_60px_rgba(255,208,74,0.24)] transition-all hover:scale-[1.02]">
-                Open Creator Engine ✨
+              <button
+                onClick={() => router.push("/studio")}
+                className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-7 py-4 text-sm font-black text-black shadow-[0_18px_60px_rgba(255,208,74,0.24)] transition-all hover:scale-[1.02]"
+              >
+                Open Creator Studio ✨
               </button>
 
-              <button className="rounded-[1rem] border border-yellow-400/25 bg-black/30 px-6 py-4 text-sm text-white/75 transition-all hover:border-yellow-400/40 hover:text-yellow-200">
-                Watch Demo ▷
-              </button>
+              {!isPremium && (
+                <button
+                  onClick={() => router.push("/pricing")}
+                  className="rounded-[1rem] border border-yellow-400/25 bg-black/30 px-6 py-4 text-sm text-white/75 transition-all hover:border-yellow-400/40 hover:text-yellow-200"
+                >
+                  Unlock Premium ▷
+                </button>
+              )}
 
             </div>
           </div>
-
-          <div className="absolute right-6 top-6 rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300">
-            Unlimited Access
-          </div>
-
         </section>
 
         <section className="mt-8">
 
           <div className="mb-6 flex items-center justify-between">
+
             <div>
               <p className="text-[11px] uppercase tracking-[0.38em] text-yellow-300">
-                Premium Modules
+                Creator Systems
               </p>
 
-              <h3 className="mt-2 text-2xl font-black">
-                Elite Creator Systems
-              </h3>
+              <h2 className="mt-2 text-3xl font-black">
+                Premium Modules
+              </h2>
             </div>
 
-            <button className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white/70 transition-all hover:border-yellow-400/30 hover:text-yellow-200">
-              View All →
-            </button>
+            <div className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm text-white/65">
+              {isPremium ? "Unlimited Access" : "Limited Access"}
+            </div>
+
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-            {premiumTools.map((tool) => (
-              <div
-                key={tool.title}
-                className="group relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400/35 hover:bg-yellow-400/[0.04] hover:shadow-[0_25px_80px_rgba(255,208,74,0.08)]"
-              >
+            {tools.map((tool) => {
 
-                <div className={`inline-flex rounded-2xl bg-gradient-to-r ${tool.glow} p-[1px]`}>
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-black text-2xl text-yellow-300">
+              const locked = tool.locked && !isPremium;
+
+              return (
+                <button
+                  key={tool.title}
+                  onClick={() => openTool(tool.title, locked)}
+                  className="group relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400/35 hover:bg-yellow-400/[0.04] hover:shadow-[0_25px_80px_rgba(255,208,74,0.08)]"
+                >
+
+                  <div className="absolute right-4 top-4">
+
+                    <span
+                      className={
+                        locked
+                          ? "rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-red-300"
+                          : "rounded-full border border-yellow-400/30 bg-yellow-400/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-yellow-300"
+                      }
+                    >
+                      {locked ? "Locked" : "Ready"}
+                    </span>
+
+                  </div>
+
+                  <div className="grid h-16 w-16 place-items-center rounded-2xl border border-yellow-400/20 bg-yellow-400/10 text-3xl text-yellow-300">
                     {tool.icon}
                   </div>
-                </div>
 
-                <h4 className="mt-5 text-2xl font-black">
-                  {tool.title}
-                </h4>
+                  <h3 className="mt-6 text-2xl font-black">
+                    {tool.title}
+                  </h3>
 
-                <p className="mt-4 text-sm leading-7 text-white/58">
-                  {tool.desc}
-                </p>
+                  <p className="mt-4 text-sm leading-7 text-white/55">
+                    {tool.desc}
+                  </p>
 
-                <div className="mt-6 flex items-center justify-between">
+                  <div className="mt-7 flex items-center justify-between">
 
-                  <span className="rounded-full bg-yellow-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-yellow-300">
-                    Elite
-                  </span>
+                    <span className="rounded-full bg-yellow-400/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-yellow-300">
+                      {isPremium ? "Elite" : "Creator"}
+                    </span>
 
-                  <button className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-sm text-white/75 transition-all hover:border-yellow-400/30 hover:text-yellow-200">
-                    Launch →
-                  </button>
+                    <span className="text-sm text-white/50 group-hover:text-yellow-200">
+                      Open →
+                    </span>
 
-                </div>
+                  </div>
 
-              </div>
-            ))}
+                </button>
+              );
+            })}
 
           </div>
 
