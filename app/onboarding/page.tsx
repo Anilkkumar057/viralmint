@@ -1,13 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
-const niches = ["Finance", "Gaming", "Anime", "Fitness", "Motivation", "AI", "Business", "Storytelling", "Education"];
+const niches = [
+  "Finance",
+  "Gaming",
+  "Anime",
+  "Fitness",
+  "Motivation",
+  "AI",
+  "Business",
+  "Storytelling",
+  "Education",
+];
+
 const platforms = ["YouTube", "Instagram", "Shorts", "X", "LinkedIn"];
-const styles = ["Cinematic", "Funny", "Aggressive", "Emotional", "Luxury", "Educational", "Dark"];
-const goals = ["Viral Growth", "Loyal Audience", "Sales", "Community", "Personal Brand"];
+
+const styles = [
+  "Cinematic",
+  "Funny",
+  "Aggressive",
+  "Emotional",
+  "Luxury",
+  "Educational",
+  "Dark",
+];
+
+const goals = [
+  "Viral Growth",
+  "Loyal Audience",
+  "Sales",
+  "Community",
+  "Personal Brand",
+];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -18,10 +45,19 @@ export default function OnboardingPage() {
   const [goal, setGoal] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const completedSteps = useMemo(() => {
+    return [niche, platform, style, goal].filter(Boolean).length;
+  }, [niche, platform, style, goal]);
+
+  const progress = Math.round((completedSteps / 4) * 100);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
-      if (!data.user) router.push("/");
+
+      if (!data.user) {
+        router.push("/");
+      }
     };
 
     checkUser();
@@ -64,55 +100,187 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] px-6 py-10 text-black">
-      <div className="mx-auto max-w-4xl rounded-[3rem] border border-black/10 bg-white/60 p-8 shadow-[0_25px_85px_rgba(126,242,194,0.14)] backdrop-blur-xl md:p-12">
-        <p className="text-xs uppercase tracking-[0.45em] text-black/35">
-          CREATOR DNA
-        </p>
+    <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(255,208,74,0.13),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(255,214,92,0.08),transparent_25%),linear-gradient(180deg,#050505_0%,#090807_55%,#050505_100%)]" />
 
-        <h1 className="mt-6 text-4xl font-light leading-tight md:text-6xl">
-          Let Viral Mint understand your creator identity.
-        </h1>
+      <div className="relative mx-auto max-w-7xl px-5 py-8">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-yellow-400/12 bg-black/40 px-6 py-5 backdrop-blur-2xl">
+          <div className="flex items-center gap-3">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-yellow-300 to-yellow-600 text-xl font-black text-black shadow-[0_0_40px_rgba(255,208,74,0.24)]">
+              M
+            </div>
 
-        <p className="mt-6 max-w-2xl text-sm leading-8 text-black/55 md:text-base">
-          Your AI will adapt to your platform, audience psychology, storytelling energy, and creator goals.
-        </p>
+            <div>
+              <p className="text-xl font-black tracking-wide">VIRAL MINT</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-yellow-300">
+                Creator DNA Setup
+              </p>
+            </div>
+          </div>
 
-        <div className="mt-14 space-y-12">
-          <QuestionBlock title="Choose your niche" items={niches} selected={niche} setSelected={setNiche} />
-          <QuestionBlock title="Main platform" items={platforms} selected={platform} setSelected={setPlatform} />
-          <QuestionBlock title="Creator style" items={styles} selected={style} setSelected={setStyle} />
-          <QuestionBlock title="Audience goal" items={goals} selected={goal} setSelected={setGoal} />
-        </div>
+          <div className="rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
+            {completedSteps}/4 Complete
+          </div>
+        </header>
 
-        <button
-          onClick={completeOnboarding}
-          disabled={loading}
-          className="mt-16 rounded-full bg-black px-10 py-5 text-xs uppercase tracking-[0.3em] text-white shadow-[0_12px_38px_rgba(126,242,194,0.24)] hover:scale-[1.03] disabled:opacity-40"
-        >
-          {loading ? "Saving DNA..." : "Enter Creator Studio"}
-        </button>
+        <section className="grid gap-8 pt-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <aside className="relative overflow-hidden rounded-[2.4rem] border border-yellow-400/22 bg-[#090807] p-8 shadow-[0_30px_120px_rgba(255,208,74,0.08)]">
+            <div className="absolute right-[-120px] top-[-80px] h-[360px] w-[360px] rounded-full bg-yellow-400/10 blur-3xl" />
+            <div className="relative z-10">
+              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-yellow-300">
+                Train Your AI
+              </p>
+
+              <h1 className="mt-6 text-5xl font-black leading-[1.05] tracking-tight md:text-6xl">
+                Build your
+                <span className="block text-yellow-300">Creator DNA.</span>
+              </h1>
+
+              <p className="mt-6 text-base leading-8 text-white/62">
+                Viral Mint will adapt to your niche, platform, content style,
+                and audience goal so every output feels made for you.
+              </p>
+
+              <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/55">AI Adaptation</span>
+                  <span className="font-black text-yellow-300">{progress}%</span>
+                </div>
+
+                <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-yellow-300 to-yellow-500 transition-all duration-500"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+
+                <p className="mt-4 text-sm leading-7 text-white/50">
+                  The more precise your DNA, the sharper your hooks, captions,
+                  scripts, and thumbnails become.
+                </p>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                {[
+                  ["Niche", niche],
+                  ["Platform", platform],
+                  ["Style", style],
+                  ["Goal", goal],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-[1.2rem] border border-white/10 bg-white/[0.03] p-4"
+                  >
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-white/35">
+                      {label}
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-yellow-300">
+                      {value || "Not set"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <section className="rounded-[2.4rem] border border-white/10 bg-white/[0.025] p-6 shadow-[0_25px_100px_rgba(0,0,0,0.35)] md:p-8">
+            <div className="space-y-8">
+              <QuestionBlock
+                step="01"
+                title="Choose your niche"
+                subtitle="What world does your content belong to?"
+                items={niches}
+                selected={niche}
+                setSelected={setNiche}
+              />
+
+              <QuestionBlock
+                step="02"
+                title="Main platform"
+                subtitle="Where do you want Viral Mint to optimize first?"
+                items={platforms}
+                selected={platform}
+                setSelected={setPlatform}
+              />
+
+              <QuestionBlock
+                step="03"
+                title="Creator style"
+                subtitle="What should your content feel like?"
+                items={styles}
+                selected={style}
+                setSelected={setStyle}
+              />
+
+              <QuestionBlock
+                step="04"
+                title="Audience goal"
+                subtitle="What result should your content create?"
+                items={goals}
+                selected={goal}
+                setSelected={setGoal}
+              />
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-[1.7rem] border border-yellow-400/15 bg-[#090807] p-4">
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Creator DNA is your platform memory.
+                </p>
+                <p className="mt-1 text-sm text-white/45">
+                  Finish setup to enter your cinematic creator workspace.
+                </p>
+              </div>
+
+              <button
+                onClick={completeOnboarding}
+                disabled={loading}
+                className="rounded-[1.2rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-7 py-3 text-sm font-black text-black shadow-[0_18px_50px_rgba(255,208,74,0.18)] transition-all hover:scale-[1.02] disabled:opacity-40"
+              >
+                {loading ? "Saving DNA..." : "Enter Creator Studio ✨"}
+              </button>
+            </div>
+          </section>
+        </section>
       </div>
     </main>
   );
 }
 
 function QuestionBlock({
+  step,
   title,
+  subtitle,
   items,
   selected,
   setSelected,
 }: {
+  step: string;
   title: string;
+  subtitle: string;
   items: string[];
   selected: string;
   setSelected: (value: string) => void;
 }) {
   return (
-    <div>
-      <p className="mb-5 text-xs uppercase tracking-[0.35em] text-black/35">
-        {title}
-      </p>
+    <div className="rounded-[1.8rem] border border-white/10 bg-black/20 p-5">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-300">
+            Step {step}
+          </p>
+
+          <h2 className="mt-2 text-2xl font-black text-white">{title}</h2>
+
+          <p className="mt-2 text-sm text-white/45">{subtitle}</p>
+        </div>
+
+        {selected && (
+          <span className="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-300">
+            Selected
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-wrap gap-3">
         {items.map((item) => (
@@ -121,8 +289,8 @@ function QuestionBlock({
             onClick={() => setSelected(item)}
             className={
               selected === item
-                ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.24)]"
-                : "rounded-full border border-black/10 bg-white/70 px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/50 hover:bg-black hover:text-white"
+                ? "rounded-[1rem] border border-yellow-400/45 bg-yellow-400/12 px-5 py-3 text-sm font-semibold text-yellow-200 shadow-[0_0_35px_rgba(255,208,74,0.12)] transition-all"
+                : "rounded-[1rem] border border-white/10 bg-white/[0.035] px-5 py-3 text-sm text-white/65 transition-all hover:border-yellow-400/30 hover:bg-yellow-400/[0.06] hover:text-yellow-200"
             }
           >
             {item}

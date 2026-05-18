@@ -1,360 +1,228 @@
 "use client";
 
-import { useRef, useState } from "react";
 import Link from "next/link";
-import { supabase } from "../../lib/supabase";
 
 const plans = [
   {
-    name: "Creator",
-    oldMonthly: 999,
-    monthly: 299,
-    annualMonthly: 199,
+    name: "Starter",
+    price: "₹999",
+    desc: "For creators starting their viral journey.",
     features: [
-      "Unlimited hooks",
-      "Creator identity memory",
-      "Vault access",
-      "Emotional CTA generation",
-      "Basic creator momentum tags",
+      "50 Generations",
+      "Hook Generator",
+      "Basic Scripts",
+      "Limited Vault",
     ],
+    glow: "border-white/10",
+    button: "Start Building",
+    premium: false,
   },
   {
     name: "Pro Creator",
-    oldMonthly: 2999,
-    monthly: 999,
-    annualMonthly: 699,
-    popular: true,
+    price: "₹2999",
+    desc: "For creators serious about audience growth.",
     features: [
-      "Unlimited generations",
-      "Cinematic script systems",
-      "Replay psychology engine",
-      "Advanced creator memory",
-      "Priority AI responses",
-      "Viral momentum analysis",
+      "Unlimited Generations",
+      "Premium Hooks",
+      "Script Engine",
+      "Thumbnail Psychology",
+      "Vault Access",
+      "Audience Retention AI",
     ],
+    glow: "border-yellow-400/35 shadow-[0_0_80px_rgba(255,208,74,0.12)]",
+    button: "Unlock Pro",
+    premium: true,
   },
   {
-    name: "Elite",
-    oldMonthly: 5999,
-    monthly: 2999,
-    annualMonthly: 1999,
+    name: "Elite Creator",
+    price: "₹5999",
+    desc: "The full cinematic creator operating system.",
     features: [
-      "Full creator operating system",
-      "Advanced AI unfolding",
-      "Platform-specific growth systems",
-      "Premium creator intelligence",
-      "Priority future features",
-      "Early access expansions",
+      "Unlimited Everything",
+      "Elite Creator Engine",
+      "Emotional AI",
+      "Advanced Thumbnails",
+      "Priority AI Access",
+      "Repurpose Packs",
+      "Creator Memory",
+      "Future AI Features",
     ],
+    glow: "border-yellow-400/55 shadow-[0_0_120px_rgba(255,208,74,0.22)]",
+    button: "Enter Elite",
+    premium: true,
   },
 ];
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
-  const [email, setEmail] = useState("");
-  const [transactionId, setTransactionId] = useState("");
-  const [query, setQuery] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const paymentRef = useRef<HTMLElement | null>(null);
-  const activePlan = plans.find((plan) => plan.name === selectedPlan);
-
-  const getPrice = (plan: (typeof plans)[number]) =>
-    billing === "monthly" ? plan.monthly : plan.annualMonthly;
-
-  const getBillingTotal = (plan: (typeof plans)[number]) =>
-    billing === "monthly" ? plan.monthly : plan.annualMonthly * 12;
-
-  const getSaving = (plan: (typeof plans)[number]) =>
-    billing === "annual" ? (plan.monthly - plan.annualMonthly) * 12 : 0;
-
-  const submitPaymentQuery = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activePlan) return;
-
-    setSubmitting(true);
-
-    const { error } = await supabase.from("payment_queries").insert([
-      {
-        email,
-        transaction_id: transactionId,
-        plan: `${activePlan.name} (${billing})`,
-        query,
-      },
-    ]);
-
-    setSubmitting(false);
-
-    if (error) {
-      alert("Something went wrong. Please try again.");
-      return;
-    }
-
-    setSuccess(true);
-    setEmail("");
-    setTransactionId("");
-    setQuery("");
-
-    setTimeout(() => setSuccess(false), 5000);
-  };
-
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_14%_8%,rgba(126,242,194,0.30),transparent_26%),radial-gradient(circle_at_88%_12%,rgba(245,199,107,0.26),transparent_24%),radial-gradient(circle_at_50%_96%,rgba(255,107,95,0.12),transparent_30%),linear-gradient(135deg,#fffaf2_0%,#fff7e8_45%,#f7fff9_100%)] px-6 py-10 text-black">
-      <div className="mx-auto max-w-7xl">
-        <header className="flex flex-col gap-6 rounded-[2rem] border border-black/10 bg-white/55 p-5 shadow-[0_20px_70px_rgba(126,242,194,0.12)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-lg font-light tracking-[0.35em]">VIRAL MINT</p>
-            <p className="mt-2 text-[10px] uppercase tracking-[0.35em] text-black/40">
-              creator growth subscriptions
-            </p>
+    <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
+
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(255,208,74,0.13),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(255,214,92,0.08),transparent_25%),linear-gradient(180deg,#050505_0%,#090807_55%,#050505_100%)]" />
+
+      <div className="relative mx-auto max-w-7xl px-5 py-8">
+
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-yellow-400/12 bg-black/40 px-6 py-5 backdrop-blur-2xl">
+
+          <div className="flex items-center gap-3">
+
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-yellow-300 to-yellow-600 text-xl font-black text-black shadow-[0_0_40px_rgba(255,208,74,0.24)]">
+              M
+            </div>
+
+            <div>
+              <p className="text-xl font-black tracking-wide">
+                VIRAL MINT
+              </p>
+
+              <p className="text-[10px] uppercase tracking-[0.3em] text-yellow-300">
+                Creator Operating System
+              </p>
+            </div>
+
           </div>
 
           <Link
             href="/studio"
-            className="rounded-full border border-black/10 bg-white/65 px-6 py-3 text-xs uppercase tracking-[0.3em] transition-all duration-500 hover:bg-black hover:text-white"
+            className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-3 text-sm font-black text-black shadow-[0_18px_50px_rgba(255,208,74,0.18)] transition-all hover:scale-[1.02]"
           >
-            Back to Studio
+            Enter Studio ✨
           </Link>
+
         </header>
 
-        <section className="mt-20 text-center">
-          <p className="text-xs uppercase tracking-[0.45em] text-black/35">
-            CHOOSE YOUR CREATOR PATH
-          </p>
+        <section className="relative overflow-hidden pt-20 text-center">
 
-          <h1 className="mt-6 text-5xl font-light leading-tight tracking-tight md:text-7xl">
-            Upgrade your creator engine.
-          </h1>
+          <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-yellow-400/10 blur-3xl" />
 
-          <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-black/55">
-            Early creator pricing is live. Pick monthly flexibility or annual
-            savings with premium creator momentum.
-          </p>
+          <div className="relative z-10">
 
-          <div className="mx-auto mt-10 flex w-fit rounded-full border border-black/10 bg-white/75 p-1 shadow-[0_20px_60px_rgba(126,242,194,0.16)] backdrop-blur-xl">
-            <button
-              onClick={() => setBilling("monthly")}
-              className={
-                billing === "monthly"
-                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.26)]"
-                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45"
-              }
-            >
-              Monthly
-            </button>
+            <div className="inline-flex items-center gap-3 rounded-full border border-yellow-400/30 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300">
+              ♕ Premium Creator Access
+            </div>
 
-            <button
-              onClick={() => setBilling("annual")}
-              className={
-                billing === "annual"
-                  ? "rounded-full bg-black px-6 py-3 text-xs uppercase tracking-[0.25em] text-white shadow-[0_8px_24px_rgba(126,242,194,0.26)]"
-                  : "rounded-full px-6 py-3 text-xs uppercase tracking-[0.25em] text-black/45"
-              }
-            >
-              Annual Save 33%
-            </button>
+            <h1 className="mx-auto mt-8 max-w-5xl text-5xl font-black leading-[1.02] tracking-tight md:text-7xl">
+              Choose your
+              <span className="block text-yellow-300">
+                creator evolution.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-white/62">
+              Viral Mint is not just another AI tool.
+              It is a cinematic creator operating system designed to
+              increase audience retention, emotional engagement,
+              and viral momentum.
+            </p>
+
           </div>
+
         </section>
 
-        <section className="mt-20 grid gap-8 lg:grid-cols-3">
-          {plans.map((plan) => {
-            const price = getPrice(plan);
-            const total = getBillingTotal(plan);
-            const saving = getSaving(plan);
+        <section className="mt-20 grid gap-6 lg:grid-cols-3">
 
-            return (
-              <div
-                key={plan.name}
-                className={
-                  plan.popular
-                    ? "relative rounded-[2.5rem] border border-black bg-black p-10 text-white shadow-[0_28px_90px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-1"
-                    : "rounded-[2.5rem] border border-black/10 bg-white/65 p-10 shadow-[0_20px_70px_rgba(126,242,194,0.10)] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(126,242,194,0.18)]"
-                }
-              >
-                {plan.popular && (
-                  <div className="absolute right-6 top-6 rounded-full bg-[#7ef2c2] px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-black shadow-[0_8px_25px_rgba(126,242,194,0.32)]">
-                    MOST POPULAR
-                  </div>
-                )}
+          {plans.map((plan, index) => (
+            <div
+              key={plan.name}
+              className={`relative overflow-hidden rounded-[2.3rem] border bg-[#090807] p-8 transition-all duration-300 hover:-translate-y-1 ${plan.glow}`}
+            >
 
-                <p
-                  className={
-                    plan.popular
-                      ? "text-xs uppercase tracking-[0.35em] text-white/60"
-                      : "text-xs uppercase tracking-[0.35em] text-black/35"
-                  }
-                >
+              {index === 2 && (
+                <div className="absolute right-5 top-5 rounded-full bg-yellow-400 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                  Most Powerful
+                </div>
+              )}
+
+              {plan.premium && (
+                <div className="absolute right-[-80px] top-[-40px] h-[220px] w-[220px] rounded-full bg-yellow-400/10 blur-3xl" />
+              )}
+
+              <div className="relative z-10">
+
+                <p className="text-[11px] uppercase tracking-[0.3em] text-yellow-300">
                   {plan.name}
                 </p>
 
-                <div className="mt-6 flex items-end gap-3">
-                  <p
-                    className={
-                      plan.popular
-                        ? "text-xl text-white/35 line-through"
-                        : "text-xl text-black/30 line-through"
-                    }
-                  >
-                    ₹{plan.oldMonthly}
-                  </p>
-
-                  <h2 className="text-5xl font-light">₹{price}</h2>
-                </div>
-
-                <p
-                  className={
-                    plan.popular
-                      ? "mt-2 text-xs uppercase tracking-[0.25em] text-white/50"
-                      : "mt-2 text-xs uppercase tracking-[0.25em] text-black/35"
-                  }
-                >
-                  {billing === "monthly"
-                    ? "per month"
-                    : `per month · billed ₹${total}/year`}
-                </p>
-
-                {billing === "annual" && (
-                  <div
-                    className={
-                      plan.popular
-                        ? "mt-5 rounded-full border border-[#7ef2c2]/30 bg-[#7ef2c2]/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#7ef2c2]"
-                        : "mt-5 rounded-full border border-[#f5c76b]/35 bg-[#fff3d6] px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#8a641c]"
-                    }
-                  >
-                    Save ₹{saving}/year
-                  </div>
-                )}
-
-                <div
-                  className={
-                    plan.popular
-                      ? "mt-10 space-y-5 text-sm leading-7 text-white/75"
-                      : "mt-10 space-y-5 text-sm leading-7 text-black/60"
-                  }
-                >
-                  {plan.features.map((feature) => (
-                    <p key={feature}>• {feature}</p>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedPlan(plan.name);
-
-                    setTimeout(() => {
-                      paymentRef.current?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
-                    }, 100);
-                  }}
-                  className={
-                    plan.popular
-                      ? "mt-12 w-full rounded-full bg-white px-6 py-4 text-xs uppercase tracking-[0.3em] text-black shadow-[0_12px_35px_rgba(126,242,194,0.22)] hover:scale-[1.02] hover:bg-[#7ef2c2]"
-                      : "mt-12 w-full rounded-full border border-black/10 bg-white/60 px-6 py-4 text-xs uppercase tracking-[0.3em] hover:bg-black hover:text-white hover:shadow-[0_12px_35px_rgba(126,242,194,0.24)]"
-                  }
-                >
-                  {billing === "monthly"
-                    ? "Pay Monthly"
-                    : "Start Annual Plan"}
-                </button>
-              </div>
-            );
-          })}
-        </section>
-
-        {activePlan && (
-          <section
-            ref={paymentRef}
-            className="mx-auto mt-24 max-w-5xl rounded-[3rem] border border-black/10 bg-white/75 p-8 shadow-[0_25px_85px_rgba(126,242,194,0.16)] backdrop-blur-xl md:p-12"
-          >
-            <div className="grid gap-10 md:grid-cols-2 md:items-start">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                  Payment Selected
-                </p>
-
-                <h2 className="mt-5 text-4xl font-light leading-tight">
-                  {activePlan.name} · ₹{getBillingTotal(activePlan)}
+                <h2 className="mt-5 text-5xl font-black">
+                  {plan.price}
+                  <span className="text-lg text-white/45">
+                    /month
+                  </span>
                 </h2>
 
-                <p className="mt-4 text-xs uppercase tracking-[0.25em] text-black/40">
-                  {billing === "monthly"
-                    ? "Monthly payment"
-                    : `Annual plan · ₹${getPrice(activePlan)}/mo effective`}
+                <p className="mt-5 text-base leading-8 text-white/60">
+                  {plan.desc}
                 </p>
 
-                <p className="mt-5 text-sm leading-8 text-black/55">
-                  Scan the QR to pay. After payment, submit your email,
-                  transaction ID, and any query below for activation.
-                </p>
+                <div className="mt-8 space-y-4">
 
-                <img
-                  src="/upi-qr.png"
-                  alt="UPI QR"
-                  className="mt-8 w-60 rounded-[2rem] border border-black/10 shadow-[0_18px_60px_rgba(245,199,107,0.22)]"
-                />
+                  {plan.features.map((feature) => (
+                    <div
+                      key={feature}
+                      className="flex items-center gap-3 text-sm text-white/78"
+                    >
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-yellow-400/10 text-yellow-300">
+                        ✓
+                      </span>
 
-                <p className="mt-5 text-xs uppercase tracking-[0.3em] text-black/40">
-                  Scan & Pay via UPI
-                </p>
-              </div>
+                      {feature}
+                    </div>
+                  ))}
 
-              <form
-                className="rounded-[2rem] border border-black/10 bg-[#fffaf2]/75 p-6 shadow-[0_18px_60px_rgba(0,0,0,0.06)]"
-                onSubmit={submitPaymentQuery}
-              >
-                <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                  Activation Query
-                </p>
-
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
-                  className="mt-6 w-full rounded-full border border-black/10 bg-white/75 px-5 py-4 text-sm outline-none"
-                />
-
-                <input
-                  type="text"
-                  required
-                  value={transactionId}
-                  onChange={(e) => setTransactionId(e.target.value)}
-                  placeholder="Transaction ID / UTR"
-                  className="mt-4 w-full rounded-full border border-black/10 bg-white/75 px-5 py-4 text-sm outline-none"
-                />
-
-                <textarea
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Any query or note..."
-                  className="mt-4 min-h-32 w-full resize-none rounded-[1.5rem] border border-black/10 bg-white/75 p-5 text-sm outline-none"
-                />
+                </div>
 
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="mt-6 w-full rounded-full bg-black px-6 py-4 text-xs uppercase tracking-[0.3em] text-white shadow-[0_10px_30px_rgba(126,242,194,0.22)] hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(126,242,194,0.36)] disabled:opacity-50"
+                  className={
+                    plan.premium
+                      ? "mt-10 w-full rounded-[1.2rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-4 text-sm font-black text-black shadow-[0_22px_70px_rgba(255,208,74,0.18)] transition-all hover:scale-[1.02]"
+                      : "mt-10 w-full rounded-[1.2rem] border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-black text-white/75 transition-all hover:border-yellow-400/30 hover:text-yellow-200"
+                  }
                 >
-                  {submitting ? "Submitting..." : "Submit Query"}
+                  {plan.button}
                 </button>
 
-                {success && (
-                  <div className="mt-5 rounded-[1.5rem] border border-[#7ef2c2]/40 bg-[#dffdf1] p-4 text-sm text-[#0f5132] shadow-[0_10px_30px_rgba(126,242,194,0.2)]">
-                    Payment query submitted successfully. Activation will be
-                    processed after verification.
-                  </div>
-                )}
-              </form>
+              </div>
+
             </div>
-          </section>
-        )}
+          ))}
+
+        </section>
+
+        <section className="mt-20 overflow-hidden rounded-[2.3rem] border border-yellow-400/18 bg-[#090807] p-10">
+
+          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center">
+
+            <div>
+
+              <p className="text-[11px] uppercase tracking-[0.38em] text-yellow-300">
+                Why creators upgrade
+              </p>
+
+              <h3 className="mt-4 text-4xl font-black leading-tight">
+                Because viral content is no longer luck.
+              </h3>
+
+              <p className="mt-6 max-w-3xl text-base leading-8 text-white/60">
+                Viral Mint combines creator psychology,
+                audience retention systems, emotional AI,
+                cinematic scripting, and growth intelligence
+                into one premium creator ecosystem.
+              </p>
+
+            </div>
+
+            <Link
+              href="/studio"
+              className="inline-flex rounded-[1.2rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-8 py-4 text-sm font-black text-black shadow-[0_22px_70px_rgba(255,208,74,0.18)] transition-all hover:scale-[1.02]"
+            >
+              Start Creating ✨
+            </Link>
+
+          </div>
+
+        </section>
+
       </div>
+
     </main>
   );
 }

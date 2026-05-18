@@ -1,295 +1,286 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { useState } from "react";
 
-type UserProfile = {
-  id: string;
-  email: string | null;
-  full_name: string | null;
-  plan: string | null;
-  is_premium: boolean | null;
-  is_admin: boolean | null;
-  is_locked: boolean | null;
-  creator_dna: unknown | null;
-  message_count: number | null;
-  approved_at: string | null;
-  created_at: string | null;
-};
+const users = [
+  {
+    name: "Anil",
+    email: "creator@viralmint.ai",
+    plan: "Elite",
+    status: "Active",
+  },
+  {
+    name: "Kabir",
+    email: "kabir@viralmint.ai",
+    plan: "Pro",
+    status: "Pending",
+  },
+  {
+    name: "Aanya",
+    email: "aanya@viralmint.ai",
+    plan: "Starter",
+    status: "Active",
+  },
+];
 
-type UserProfileUpdates = Partial<
-  Pick<UserProfile, "is_premium" | "is_locked" | "plan" | "approved_at">
->;
-
-const ADMIN_EMAILS = ["mystocktradesk@gmail.com"];
-const PLANS = ["free", "starter", "pro", "elite"];
-
-export default function AdminApprovalDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [status, setStatus] = useState("");
-
-  useEffect(() => {
-    checkAdminAndLoadUsers();
-  }, []);
-
-  async function checkAdminAndLoadUsers() {
-    setLoading(true);
-    setStatus("");
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      setIsAdmin(false);
-      setStatus("Please login first.");
-      setLoading(false);
-      return;
-    }
-
-    const isAllowedAdmin = ADMIN_EMAILS.includes(user.email || "");
-
-    if (!isAllowedAdmin) {
-      setIsAdmin(false);
-      setStatus("Access denied. Admin only.");
-      setLoading(false);
-      return;
-    }
-
-    setIsAdmin(true);
-
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      setStatus(error.message);
-      setUsers([]);
-    } else {
-      setUsers((data || []) as UserProfile[]);
-    }
-
-    setLoading(false);
-  }
-
-  async function updateUser(id: string, updates: UserProfileUpdates) {
-    setStatus("Updating...");
-
-    const { error } = await supabase
-      .from("user_profiles")
-      .update(updates)
-      .eq("id", id);
-
-    if (error) {
-      setStatus(error.message);
-      return;
-    }
-
-    setUsers((prev) =>
-      prev.map((user) => (user.id === id ? { ...user, ...updates } : user))
-    );
-
-    setStatus("Updated successfully.");
-  }
-
-  async function changePlan(id: string, plan: string) {
-    await updateUser(id, {
-      plan,
-      is_premium: plan !== "free",
-      is_locked: false,
-      approved_at: plan !== "free" ? new Date().toISOString() : null,
-    });
-  }
-
-  async function approveUser(user: UserProfile) {
-    const selectedPlan = user.plan && user.plan !== "free" ? user.plan : "elite";
-
-    await updateUser(user.id, {
-      is_premium: true,
-      is_locked: false,
-      plan: selectedPlan,
-      approved_at: new Date().toISOString(),
-    });
-  }
-
-  async function makeElite(user: UserProfile) {
-    await updateUser(user.id, {
-      is_premium: true,
-      is_locked: false,
-      plan: "elite",
-      approved_at: new Date().toISOString(),
-    });
-  }
-
-  async function rejectUser(id: string) {
-    await updateUser(id, {
-      is_premium: false,
-      plan: "free",
-      approved_at: null,
-    });
-  }
-
-  async function lockUser(id: string, value: boolean) {
-    await updateUser(id, {
-      is_locked: value,
-    });
-  }
-
-  if (loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-black text-white">
-        <p className="text-white/70">Loading admin dashboard...</p>
-      </main>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-black p-6 text-white">
-        <div className="max-w-md rounded-3xl border border-red-500/30 bg-red-500/10 p-6 text-center">
-          <h1 className="mb-2 text-2xl font-bold">Admin Access Only</h1>
-          <p className="text-white/70">{status}</p>
-        </div>
-      </main>
-    );
-  }
+export default function AdminPage() {
+  const [selected, setSelected] = useState("Overview");
 
   return (
-    <main className="min-h-screen bg-[#050505] p-6 text-white">
-      <section className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl">
-          <p className="mb-2 text-sm text-emerald-300">Viral Mint Control Room</p>
-          <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-            Admin Approval Dashboard
-          </h1>
-          <p className="mt-3 max-w-2xl text-white/60">
-            Approve premium users, switch plans, lock misuse, and control access without touching code.
-          </p>
+    <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
 
-          {status && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/70">
-              {status}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(255,208,74,0.12),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(255,214,92,0.08),transparent_25%),linear-gradient(180deg,#050505_0%,#090807_55%,#050505_100%)]" />
+
+      <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-[260px_1fr]">
+
+        <aside className="hidden border-r border-yellow-400/10 bg-black/55 px-5 py-7 backdrop-blur-xl lg:block">
+
+          <div className="mb-10 flex items-center gap-3">
+
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-yellow-300 to-yellow-600 text-xl font-black text-black shadow-[0_0_40px_rgba(255,208,74,0.24)]">
+              M
             </div>
-          )}
-        </div>
 
-        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]">
-          <div className="grid grid-cols-7 gap-4 border-b border-white/10 bg-white/[0.05] px-5 py-4 text-xs font-bold uppercase tracking-wider text-white/50">
-            <div>User</div>
-            <div>Plan</div>
-            <div>Premium</div>
-            <div>Messages</div>
-            <div>Status</div>
-            <div>DNA</div>
-            <div>Actions</div>
+            <div>
+              <p className="text-xl font-black tracking-wide">
+                VIRAL MINT
+              </p>
+
+              <p className="text-[10px] uppercase tracking-[0.3em] text-yellow-300">
+                Admin Control
+              </p>
+            </div>
+
           </div>
 
-          {users.length === 0 ? (
-            <div className="p-8 text-center text-white/50">No users found yet.</div>
-          ) : (
-            users.map((user) => {
-              const currentPlan = user.plan || "free";
-              const isElite = currentPlan === "elite";
+          <nav className="space-y-2">
 
-              return (
-                <div
-                  key={user.id}
-                  className="grid grid-cols-7 items-center gap-4 border-b border-white/10 px-5 py-4 text-sm hover:bg-white/[0.03]"
-                >
-                  <div>
-                    <p className="font-semibold">{user.full_name || "Unnamed"}</p>
-                    <p className="text-xs text-white/40">{user.email || "No email"}</p>
-                  </div>
+            {[
+              "Overview",
+              "Users",
+              "Approvals",
+              "Subscriptions",
+              "Analytics",
+              "Creator Activity",
+              "Payments",
+              "Settings",
+            ].map((item) => (
+              <button
+                key={item}
+                onClick={() => setSelected(item)}
+                className={
+                  selected === item
+                    ? "flex w-full items-center gap-3 rounded-[1.2rem] border border-yellow-400/40 bg-yellow-400/10 px-4 py-3 text-left text-sm font-semibold text-yellow-200 shadow-[0_0_30px_rgba(255,208,74,0.12)]"
+                    : "flex w-full items-center gap-3 rounded-[1.2rem] px-4 py-3 text-left text-sm text-white/70 transition-all hover:bg-white/[0.04] hover:text-yellow-200"
+                }
+              >
+                <span>✦</span>
+                {item}
+              </button>
+            ))}
 
-                  <div>
-                    <select
-                      value={currentPlan}
-                      onChange={(event) => changePlan(user.id, event.target.value)}
-                      className="rounded-xl border border-white/10 bg-black px-3 py-2 text-white outline-none"
-                    >
-                      {PLANS.map((plan) => (
-                        <option key={plan} value={plan}>
-                          {plan.charAt(0).toUpperCase() + plan.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+          </nav>
 
-                  <div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        user.is_premium
-                          ? "bg-emerald-400/15 text-emerald-300"
-                          : "bg-white/10 text-white/50"
-                      }`}
-                    >
-                      {user.is_premium ? `${currentPlan.toUpperCase()} Unlocked` : "Free"}
-                    </span>
-                  </div>
+          <div className="mt-10 rounded-[1.6rem] border border-yellow-400/20 bg-yellow-400/[0.05] p-5">
 
-                  <div className="text-white/70">{user.message_count || 0}</div>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-yellow-300">
+              Platform Status
+            </p>
 
-                  <div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        user.is_locked
-                          ? "bg-red-400/15 text-red-300"
-                          : "bg-blue-400/15 text-blue-300"
-                      }`}
-                    >
-                      {user.is_locked ? "Locked" : "Active"}
-                    </span>
-                  </div>
+            <div className="mt-5 space-y-4">
 
-                  <div className="text-xs text-white/50">
-                    {user.creator_dna ? "Connected" : "Not set"}
-                  </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/60">
+                  Active Users
+                </span>
 
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => approveUser(user)}
-                      className="rounded-xl bg-emerald-400 px-3 py-2 text-xs font-black text-black hover:bg-emerald-300"
-                    >
-                      Approve
-                    </button>
+                <span className="text-yellow-300">
+                  1,248
+                </span>
+              </div>
 
-                    {!isElite && (
-                      <button
-                        onClick={() => makeElite(user)}
-                        className="rounded-xl bg-yellow-300 px-3 py-2 text-xs font-black text-black hover:bg-yellow-200"
-                      >
-                        Elite
-                      </button>
-                    )}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/60">
+                  Elite Creators
+                </span>
 
-                    <button
-                      onClick={() => rejectUser(user.id)}
-                      className="rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20"
-                    >
-                      Reject
-                    </button>
+                <span className="text-yellow-300">
+                  186
+                </span>
+              </div>
 
-                    <button
-                      onClick={() => lockUser(user.id, !user.is_locked)}
-                      className={`rounded-xl px-3 py-2 text-xs font-bold ${
-                        user.is_locked
-                          ? "bg-blue-400 text-black"
-                          : "bg-red-500/80 text-white"
-                      }`}
-                    >
-                      {user.is_locked ? "Unlock" : "Lock"}
-                    </button>
-                  </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/60">
+                  MRR
+                </span>
+
+                <span className="text-yellow-300">
+                  ₹3.8L
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+        <section className="min-w-0">
+
+          <header className="sticky top-0 z-40 border-b border-yellow-400/10 bg-black/45 px-5 py-4 backdrop-blur-2xl">
+
+            <div className="mx-auto flex max-w-7xl items-center justify-between">
+
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.35em] text-yellow-300">
+                  Admin Dashboard
+                </p>
+
+                <h1 className="mt-2 text-3xl font-black">
+                  Control Center
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                <div className="rounded-full border border-yellow-400/35 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-yellow-300 shadow-[0_0_40px_rgba(255,208,74,0.18)]">
+                  ♕ Admin Active
                 </div>
-              );
-            })
-          )}
-        </div>
-      </section>
+
+                <button className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm text-white/70 transition-all hover:border-yellow-400/30 hover:text-yellow-200">
+                  Export
+                </button>
+
+              </div>
+
+            </div>
+
+          </header>
+
+          <div className="mx-auto max-w-7xl px-5 py-8">
+
+            <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+              {[
+                ["Total Users", "12,482"],
+                ["Elite Members", "1,284"],
+                ["Monthly Revenue", "₹8.4L"],
+                ["AI Generations", "1.8M"],
+              ].map(([title, value]) => (
+                <div
+                  key={title}
+                  className="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6"
+                >
+
+                  <p className="text-sm text-white/55">
+                    {title}
+                  </p>
+
+                  <h2 className="mt-4 text-4xl font-black text-yellow-300">
+                    {value}
+                  </h2>
+
+                </div>
+              ))}
+
+            </section>
+
+            <section className="mt-8 overflow-hidden rounded-[2rem] border border-yellow-400/18 bg-[#090807] p-8 shadow-[0_25px_100px_rgba(255,208,74,0.08)]">
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.35em] text-yellow-300">
+                    User Management
+                  </p>
+
+                  <h3 className="mt-3 text-3xl font-black">
+                    Premium Access Control
+                  </h3>
+                </div>
+
+                <button className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-3 text-sm font-black text-black shadow-[0_18px_50px_rgba(255,208,74,0.18)] transition-all hover:scale-[1.02]">
+                  Add Creator ✨
+                </button>
+
+              </div>
+
+              <div className="mt-8 overflow-hidden rounded-[1.5rem] border border-white/10">
+
+                <table className="w-full">
+
+                  <thead className="bg-yellow-400/10 text-left text-sm text-yellow-300">
+                    <tr>
+                      <th className="px-5 py-4">Creator</th>
+                      <th className="px-5 py-4">Plan</th>
+                      <th className="px-5 py-4">Status</th>
+                      <th className="px-5 py-4">Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                    {users.map((user) => (
+                      <tr
+                        key={user.email}
+                        className="border-t border-white/10"
+                      >
+
+                        <td className="px-5 py-5">
+                          <div>
+                            <p className="font-semibold">
+                              {user.name}
+                            </p>
+
+                            <p className="mt-1 text-sm text-white/45">
+                              {user.email}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="px-5 py-5">
+                          <span className="rounded-full bg-yellow-400/10 px-4 py-2 text-xs uppercase tracking-[0.18em] text-yellow-300">
+                            {user.plan}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-5">
+                          <span className="text-emerald-300">
+                            {user.status}
+                          </span>
+                        </td>
+
+                        <td className="px-5 py-5">
+                          <div className="flex flex-wrap gap-2">
+
+                            <button className="rounded-full border border-yellow-400/25 bg-yellow-400/10 px-4 py-2 text-xs text-yellow-300 transition-all hover:bg-yellow-400 hover:text-black">
+                              Approve
+                            </button>
+
+                            <button className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-white/70 transition-all hover:border-red-400/30 hover:text-red-300">
+                              Revoke
+                            </button>
+
+                          </div>
+                        </td>
+
+                      </tr>
+                    ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </section>
+
+          </div>
+
+        </section>
+
+      </div>
+
     </main>
   );
 }
