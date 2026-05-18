@@ -97,6 +97,245 @@ const toolCards: ToolCard[] = [
   },
 ];
 
+
+const UI_TEXT = {
+  English: {
+    welcomeBack: "Welcome back,",
+    creatorWorkspaceReady: "{copy.creatorWorkspaceReady}",
+    premiumCreatorEngine: "{copy.premiumCreatorEngine}",
+    premiumTools: "{copy.premiumTools}",
+    unlimitedPowerPrefix: "Unlimited Power for",
+    creators: "{copy.creators}",
+    premiumDescription:
+      "Generate hooks, captions, scripts, hashtags, thumbnails, repurpose packs, emotional CTAs, and creator growth systems from one cinematic studio.",
+    openPremiumTools: "Open {copy.premiumTools} ›",
+    unlockPremium: copy.unlockPremium,
+    howItWorks: "{copy.howItWorks}",
+    freeActive: "{copy.freeActive}",
+    savedVault: "{copy.savedVault}",
+    noSavedGenerations: "{copy.noSavedGenerations}",
+    close: "{copy.close}",
+    creatorWorkspace: "{copy.creatorWorkspace}",
+    createToday: "{copy.createToday}",
+    creativeFlow: "{copy.creativeFlow}",
+    freeTrial: "Free Trial",
+    unlimited: "Unlimited",
+    day: "Day",
+    upgradeTitle: "{copy.upgradeTitle}",
+    upgradeBody:
+      "Premium unlocks unlimited generation, deeper creator systems, cinematic expansion, and advanced audience retention tools.",
+    continuePremium: "{copy.continuePremium}",
+    stayStudio: "{copy.stayStudio}",
+    ideaPlaceholder: 'Type your idea... (e.g. "Viral hook about never giving up")',
+    generating: "Generating...",
+    generate: "Generate ✨",
+    eliteCreatorTools: "{copy.eliteCreatorTools}",
+    viewAllTools: "{copy.viewAllTools}",
+    generatedOutput: "{copy.generatedOutput}",
+    generatedOutputSub: "{copy.generatedOutputSub}",
+    unfolding: "Unfolding...",
+    pushFurther: "Push Further →",
+    deeperDirections: "{copy.deeperDirections}",
+    copy: "Copy",
+    copied: "Copied",
+    save: "Save",
+    languageLabel: "{copy.languageLabel}",
+    profileDna: "{copy.profileDna}",
+    billing: "{copy.billing}",
+    logout: "{copy.logout}",
+    dna: "DNA",
+    vault: "Vault",
+    pricing: "Pricing",
+    helpSupport: "{copy.helpSupport}",
+    openTools: "Open Tools",
+    upgrade: "Upgrade",
+    toolLabels: {
+      "Hook Generator": "Hook Generator",
+      "Viral Title": "Viral Title",
+      "Script Engine": "Script Engine",
+      "Thumbnails": "Thumbnails",
+      "Hashtag Finder": "Hashtag Finder",
+      "Repurpose Pack": "Repurpose Pack",
+      "Emotion Map": "Emotion Map",
+      "{copy.premiumTools}": "{copy.premiumTools}",
+      "Growth Map": "Growth Map",
+      "Analytics": "Analytics",
+      "Audience": "Audience",
+      "Settings": "Settings",
+      "DNA": "DNA",
+      "Vault": "Vault",
+      "Pricing": "Pricing",
+      "Logout": "Logout",
+    },
+    toolDescriptions: {
+      "Hook Generator": "Create scroll-stopping hooks instantly.",
+      "Viral Title": "AI titles that grab attention.",
+      "Script Engine": "Create engaging scripts that convert.",
+      "Thumbnails": "High CTR thumbnail ideas that stand out.",
+      "Hashtag Finder": "Find trend-ready hashtags that rank.",
+      "Emotion Map": "Trigger emotions that drive engagement.",
+      "Repurpose Pack": "Turn one idea into multiple assets.",
+    },
+  },
+  Hindi: {
+    welcomeBack: "वापस स्वागत है,",
+    creatorWorkspaceReady: "आपका क्रिएटर वर्कस्पेस तैयार है।",
+    premiumCreatorEngine: "प्रीमियम क्रिएटर इंजन",
+    premiumTools: "प्रीमियम टूल्स",
+    unlimitedPowerPrefix: "अनलिमिटेड पावर",
+    creators: "क्रिएटर्स के लिए",
+    premiumDescription:
+      "हुक, कैप्शन, स्क्रिप्ट, हैशटैग, थंबनेल, री-पर्पज़ पैक, इमोशनल CTA और ग्रोथ सिस्टम एक ही सिनेमैटिक स्टूडियो में बनाएं।",
+    openPremiumTools: "प्रीमियम टूल्स खोलें ›",
+    unlockPremium: "प्रीमियम अनलॉक करें ›",
+    howItWorks: "यह कैसे काम करता है ▷",
+    freeActive: "फ्री एक्टिव",
+    savedVault: "सेव्ड वॉल्ट",
+    noSavedGenerations: "अभी कोई सेव्ड जनरेशन नहीं है।",
+    close: "बंद करें",
+    creatorWorkspace: "क्रिएटर वर्कस्पेस",
+    createToday: "आज आप क्या क्रिएट करना चाहते हैं?",
+    creativeFlow: "क्रिएटिव फ्लो",
+    freeTrial: "फ्री ट्रायल",
+    unlimited: "अनलिमिटेड",
+    day: "दिन",
+    upgradeTitle: "आपका फ्री क्रिएटर सेशन पूरा हो गया है।",
+    upgradeBody:
+      "प्रीमियम में अनलिमिटेड जनरेशन, डीपर क्रिएटर सिस्टम, सिनेमैटिक एक्सपैंशन और एडवांस्ड ऑडियंस रिटेंशन टूल्स मिलते हैं।",
+    continuePremium: "प्रीमियम के साथ जारी रखें",
+    stayStudio: "स्टूडियो में रहें",
+    ideaPlaceholder: 'अपना आइडिया लिखें... जैसे "हार न मानने पर वायरल हुक"',
+    generating: "बन रहा है...",
+    generate: "बनाएं ✨",
+    eliteCreatorTools: "एलीट क्रिएटर टूल्स",
+    viewAllTools: "सभी टूल्स देखें →",
+    generatedOutput: "बना हुआ आउटपुट",
+    generatedOutputSub: "कॉपी करें, सेव करें, या इसे और गहराई में खोलें।",
+    unfolding: "खुल रहा है...",
+    pushFurther: "और आगे बढ़ाएं →",
+    deeperDirections: "डीपर डायरेक्शन्स",
+    copy: "कॉपी",
+    copied: "कॉपी हो गया",
+    save: "सेव",
+    languageLabel: "🌐 भाषा चुनें",
+    profileDna: "♙ प्रोफाइल DNA",
+    billing: "▤ बिलिंग",
+    logout: "↪ लॉगआउट",
+    dna: "DNA",
+    vault: "वॉल्ट",
+    pricing: "प्राइसिंग",
+    helpSupport: "? सहायता",
+    openTools: "टूल्स खोलें",
+    upgrade: "अपग्रेड",
+    toolLabels: {
+      "Hook Generator": "हुक जनरेटर",
+      "Viral Title": "वायरल टाइटल",
+      "Script Engine": "स्क्रिप्ट इंजन",
+      "Thumbnails": "थंबनेल्स",
+      "Hashtag Finder": "हैशटैग फाइंडर",
+      "Repurpose Pack": "री-पर्पज़ पैक",
+      "Emotion Map": "इमोशन मैप",
+      "{copy.premiumTools}": "प्रीमियम टूल्स",
+      "Growth Map": "ग्रोथ मैप",
+      "Analytics": "एनालिटिक्स",
+      "Audience": "ऑडियंस",
+      "Settings": "सेटिंग्स",
+      "DNA": "DNA",
+      "Vault": "वॉल्ट",
+      "Pricing": "प्राइसिंग",
+      "Logout": "लॉगआउट",
+    },
+    toolDescriptions: {
+      "Hook Generator": "तुरंत ध्यान खींचने वाले हुक बनाएं।",
+      "Viral Title": "ऐसे टाइटल बनाएं जो क्लिक खींचें।",
+      "Script Engine": "एंगेजिंग स्क्रिप्ट बनाएं।",
+      "Thumbnails": "हाई CTR थंबनेल आइडिया पाएं।",
+      "Hashtag Finder": "रीच बढ़ाने वाले हैशटैग खोजें।",
+      "Emotion Map": "ऐसे इमोशन ट्रिगर करें जो एंगेजमेंट बढ़ाएं।",
+      "Repurpose Pack": "एक आइडिया को कई कंटेंट एसेट्स में बदलें।",
+    },
+  },
+  Hinglish: {
+    welcomeBack: "Welcome back,",
+    creatorWorkspaceReady: "Tumhara {copy.creatorWorkspace} ready hai.",
+    premiumCreatorEngine: "{copy.premiumCreatorEngine}",
+    premiumTools: "{copy.premiumTools}",
+    unlimitedPowerPrefix: "Unlimited Power",
+    creators: "{copy.creators} ke liye",
+    premiumDescription:
+      "Hooks, captions, scripts, hashtags, thumbnails, repurpose packs, emotional CTAs aur creator growth systems ek cinematic studio me banao.",
+    openPremiumTools: "{copy.premiumTools} Kholो ›",
+    unlockPremium: "Premium Unlock Karo ›",
+    howItWorks: "Kaise Kaam Karta Hai ▷",
+    freeActive: "{copy.freeActive}",
+    savedVault: "{copy.savedVault}",
+    noSavedGenerations: "Abhi koi saved generation nahi hai.",
+    close: "{copy.close}",
+    creatorWorkspace: "{copy.creatorWorkspace}",
+    createToday: "Aaj kya create karna hai?",
+    creativeFlow: "{copy.creativeFlow}",
+    freeTrial: "Free Trial",
+    unlimited: "Unlimited",
+    day: "Day",
+    upgradeTitle: "Tumhara free creator session complete ho gaya.",
+    upgradeBody:
+      "Premium me unlimited generation, deeper creator systems, cinematic expansion aur advanced audience retention tools milte hain.",
+    continuePremium: "Premium Ke Saath Continue Karo",
+    stayStudio: "Studio Me Raho",
+    ideaPlaceholder: 'Apna idea likho... jaise "Never give up par viral hook"',
+    generating: "Generate ho raha hai...",
+    generate: "Generate Karo ✨",
+    eliteCreatorTools: "{copy.eliteCreatorTools}",
+    viewAllTools: "Saare Tools Dekho →",
+    generatedOutput: "{copy.generatedOutput}",
+    generatedOutputSub: "Copy karo, save karo, ya aur deeper unfold karo.",
+    unfolding: "Unfold ho raha hai...",
+    pushFurther: "Push Further →",
+    deeperDirections: "{copy.deeperDirections}",
+    copy: "Copy",
+    copied: "Copied",
+    save: "Save",
+    languageLabel: "{copy.languageLabel}",
+    profileDna: "{copy.profileDna}",
+    billing: "{copy.billing}",
+    logout: "{copy.logout}",
+    dna: "DNA",
+    vault: "Vault",
+    pricing: "Pricing",
+    helpSupport: "{copy.helpSupport}",
+    openTools: "Tools Kholो",
+    upgrade: "Upgrade",
+    toolLabels: {
+      "Hook Generator": "Hook Generator",
+      "Viral Title": "Viral Title",
+      "Script Engine": "Script Engine",
+      "Thumbnails": "Thumbnails",
+      "Hashtag Finder": "Hashtag Finder",
+      "Repurpose Pack": "Repurpose Pack",
+      "Emotion Map": "Emotion Map",
+      "{copy.premiumTools}": "{copy.premiumTools}",
+      "Growth Map": "Growth Map",
+      "Analytics": "Analytics",
+      "Audience": "Audience",
+      "Settings": "Settings",
+      "DNA": "DNA",
+      "Vault": "Vault",
+      "Pricing": "Pricing",
+      "Logout": "Logout",
+    },
+    toolDescriptions: {
+      "Hook Generator": "Instant scroll-stopping hooks banao.",
+      "Viral Title": "Attention grab karne wale AI titles.",
+      "Script Engine": "Engaging scripts banao jo convert karein.",
+      "Thumbnails": "High CTR thumbnail ideas jo alag dikhein.",
+      "Hashtag Finder": "Trend-ready hashtags find karo.",
+      "Emotion Map": "Audience engagement ke emotions trigger karo.",
+      "Repurpose Pack": "Ek idea ko multiple assets me badlo.",
+    },
+  },
+} as const;
+
+
 export default function StudioPage() {
   const router = useRouter();
 
@@ -108,7 +347,7 @@ export default function StudioPage() {
   const [expanding, setExpanding] = useState(false);
 
   const [languageOpen, setLanguageOpen] = useState(false);
-  const [language, setLanguage] = useState("Hinglish");
+  const [language, setLanguage] = useState("English");
 
   const [profile, setProfile] = useState<CreatorProfile | null>(null);
   const [plan, setPlan] = useState("free");
@@ -144,10 +383,36 @@ export default function StudioPage() {
     return firstName.slice(0, 2).toUpperCase();
   }, [firstName]);
 
+  const languageKey =
+    language === "हिन्दी" ? "Hindi" : language === "Hinglish" ? "Hinglish" : "English";
+
+  const copy = UI_TEXT[languageKey as keyof typeof UI_TEXT] || UI_TEXT.English;
+
   const usageText =
     cleanPlan === "free"
-      ? `Free Trial · ${generationCount}/10`
-      : `${cleanPlan.toUpperCase()} Plan · Unlimited`;
+      ? `${copy.freeTrial} · ${generationCount}/10`
+      : `${cleanPlan.toUpperCase()} Plan · ${copy.unlimited}`;
+
+  useEffect(() => {
+    const savedLanguage =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("viral_mint_language")
+        : null;
+
+    if (
+      savedLanguage === "English" ||
+      savedLanguage === "हिन्दी" ||
+      savedLanguage === "Hinglish"
+    ) {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("viral_mint_language", language);
+    }
+  }, [language]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -566,7 +831,7 @@ Create deeper, sharper second-layer creator directions.
       return;
     }
 
-    if (tool === "Premium Tools") {
+    if (tool === "{copy.premiumTools}") {
       router.push("/premium-tools");
       return;
     }
@@ -637,9 +902,9 @@ Create deeper, sharper second-layer creator directions.
               },
               {
                 icon: "♕",
-                label: "Premium Tools",
+                label: "{copy.premiumTools}",
                 active: false,
-                action: () => openPremiumTool("Premium Tools"),
+                action: () => openPremiumTool("{copy.premiumTools}"),
               },
               { icon: "⌘", label: "DNA", active: false, action: () => router.push("/onboarding") },
               { icon: "▥", label: "Growth Map", active: false, action: () => openPremiumTool("Growth Map") },
@@ -657,7 +922,7 @@ Create deeper, sharper second-layer creator directions.
                 }
               >
                 <span className="text-lg text-yellow-300">{item.icon}</span>
-                <span>{item.label}</span>
+                <span>{copy.toolLabels[item.label as keyof typeof copy.toolLabels] || item.label}</span>
                 {item.label === "Thumbnails" && (
                   <span className="ml-auto rounded-full bg-yellow-400/15 px-2 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-yellow-300">
                     New
@@ -680,19 +945,19 @@ Create deeper, sharper second-layer creator directions.
               onClick={() => router.push(isPremiumUser ? "/premium-tools" : "/pricing")}
               className="mt-4 flex w-full items-center justify-between rounded-[1rem] border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/85 hover:border-yellow-400/30"
             >
-              {isPremiumUser ? "Open Tools" : "Upgrade"} <span>›</span>
+              {isPremiumUser ? copy.openTools : copy.upgrade} <span>›</span>
             </button>
           </div>
 
           <div className="absolute bottom-7 left-5 right-5 space-y-2 text-sm text-white/65">
             <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2 hover:text-yellow-200">
-              ? Help & Support
+              {copy.helpSupport}
             </button>
             <button
               onClick={signOut}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2 hover:text-yellow-200"
             >
-              ↪ Logout
+              {copy.logout}
             </button>
           </div>
         </aside>
@@ -703,7 +968,7 @@ Create deeper, sharper second-layer creator directions.
               <div className="flex items-center gap-3">
                 <span className="text-yellow-300">◌</span>
                 <p className="text-sm text-white/80">
-                  Welcome back,{" "}
+                  {copy.welcomeBack}{" "}
                   <span className="font-semibold text-white">{firstName}</span>{" "}
                   <span className="text-yellow-300">♕</span>
                 </p>
@@ -720,7 +985,7 @@ Create deeper, sharper second-layer creator directions.
                 )}
 
                 <div className="hidden rounded-[1.2rem] border border-yellow-400/45 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_35px_rgba(245,183,44,0.18)] md:block">
-                  ♕ {cleanPlan === "free" ? "Free Active" : `${cleanPlan} Active`}
+                  ♕ {cleanPlan === "free" ? "{copy.freeActive}" : `${cleanPlan} Active`}
                 </div>
 
                 <button
@@ -746,7 +1011,7 @@ Create deeper, sharper second-layer creator directions.
                   {languageOpen && (
                     <div className="absolute right-0 top-12 z-40 w-56 rounded-[1.4rem] border border-yellow-400/20 bg-[#080807]/95 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
                       <p className="mb-2 border-b border-white/10 pb-3 text-sm text-white/85">
-                        🌐 Language / भाषा
+                        {copy.languageLabel}
                       </p>
 
                       {["English", "हिन्दी", "Hinglish"].map((item) => (
@@ -772,19 +1037,19 @@ Create deeper, sharper second-layer creator directions.
                           onClick={() => router.push("/onboarding")}
                           className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/65 hover:bg-white/[0.05]"
                         >
-                          ♙ Profile DNA
+                          {copy.profileDna}
                         </button>
                         <button
                           onClick={() => router.push("/pricing")}
                           className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/65 hover:bg-white/[0.05]"
                         >
-                          ▤ Billing
+                          {copy.billing}
                         </button>
                         <button
                           onClick={signOut}
                           className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/65 hover:bg-white/[0.05]"
                         >
-                          ↪ Logout
+                          {copy.logout}
                         </button>
                       </div>
                     </div>
@@ -809,7 +1074,7 @@ Create deeper, sharper second-layer creator directions.
                     {cleanPlan === "free" ? "Creator" : `${cleanPlan} Creator`}
                   </p>
                   <p className="mt-1 text-sm text-white/55">
-                    Your Creator Workspace is ready.
+                    {copy.creatorWorkspaceReady}
                   </p>
                 </div>
               </div>
@@ -829,7 +1094,7 @@ Create deeper, sharper second-layer creator directions.
                     <span className="mb-1 block text-xl text-yellow-300">
                       {item.icon}
                     </span>
-                    {item.label}
+                    {copy.toolLabels[item.label as keyof typeof copy.toolLabels] || item.label}
                   </button>
                 ))}
               </div>
@@ -844,23 +1109,21 @@ Create deeper, sharper second-layer creator directions.
 
               <div className="relative z-10 max-w-3xl">
                 <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-300">
-                  Premium Creator Engine
+                  {copy.premiumCreatorEngine}
                 </p>
 
                 <h2 className="mt-5 text-4xl font-black leading-tight md:text-5xl">
-                  Premium Tools
+                  {copy.premiumTools}
                   <br />
-                  Unlimited Power for{" "}
+                  {copy.unlimitedPowerPrefix}{" "}
                   <span className="text-yellow-300">
-                    {cleanPlan === "free" ? "Creators" : cleanPlan}
+                    {cleanPlan === "free" ? "{copy.creators}" : cleanPlan}
                   </span>{" "}
-                  Creators
+                  {copy.creators}
                 </h2>
 
                 <p className="mt-5 max-w-2xl text-base leading-8 text-white/72">
-                  Generate hooks, captions, scripts, hashtags, thumbnails,
-                  repurpose packs, emotional CTAs, and creator growth systems
-                  from one cinematic studio.
+                  {copy.premiumDescription}
                 </p>
 
                 <div className="mt-7 flex flex-wrap gap-3">
@@ -870,20 +1133,20 @@ Create deeper, sharper second-layer creator directions.
                     }
                     className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-3 text-sm font-black text-black shadow-[0_18px_50px_rgba(245,183,44,0.24)] transition-all hover:scale-[1.02]"
                   >
-                    {isPremiumUser ? "Open Premium Tools ›" : "Unlock Premium ›"}
+                    {isPremiumUser ? "Open {copy.premiumTools} ›" : copy.unlockPremium}
                   </button>
 
                   <button
                     onClick={() => openPremiumTool("How It Works")}
                     className="rounded-[1rem] border border-yellow-400/25 bg-black/30 px-5 py-3 text-sm text-white/80 hover:border-yellow-400/45 hover:text-yellow-200"
                   >
-                    How It Works ▷
+                    {copy.howItWorks}
                   </button>
                 </div>
               </div>
 
               <div className="absolute right-6 top-5 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.25em] text-yellow-300">
-                ♕ {cleanPlan === "free" ? "Free Active" : `${cleanPlan} Active`}
+                ♕ {cleanPlan === "free" ? "{copy.freeActive}" : `${cleanPlan} Active`}
               </div>
             </section>
 
@@ -891,19 +1154,19 @@ Create deeper, sharper second-layer creator directions.
               <section className="mt-7 rounded-[1.8rem] border border-yellow-400/15 bg-white/[0.035] p-5">
                 <div className="mb-5 flex items-center justify-between">
                   <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-300">
-                    Saved Vault
+                    {copy.savedVault}
                   </p>
 
                   <button
                     onClick={() => setVaultOpen(false)}
                     className="text-sm text-white/55 hover:text-yellow-200"
                   >
-                    Close
+                    {copy.close}
                   </button>
                 </div>
 
                 {vaultItems.length === 0 ? (
-                  <p className="text-sm text-white/45">No saved generations yet.</p>
+                  <p className="text-sm text-white/45">{copy.noSavedGenerations}</p>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
                     {vaultItems.map((item) => (
@@ -941,17 +1204,17 @@ Create deeper, sharper second-layer creator directions.
 
             <section className="mt-8 text-center">
               <p className="text-[11px] font-bold uppercase tracking-[0.45em] text-yellow-300">
-                Creator Workspace
+                {copy.creatorWorkspace}
               </p>
 
               <h2 className="mt-3 text-3xl font-light tracking-tight md:text-4xl">
-                What do you want to create today?
+                {copy.createToday}
               </h2>
 
               <div className="mx-auto mt-3 inline-flex flex-wrap justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-[11px] uppercase tracking-[0.18em] text-white/55">
                 {usageText} <span className="mx-3 text-yellow-300">•</span>
-                Creative Flow <span className="mx-3 text-yellow-300">•</span>
-                Day {streakCount}
+                {copy.creativeFlow} <span className="mx-3 text-yellow-300">•</span>
+                {copy.day} {streakCount}
               </div>
 
               {profile && (
@@ -967,12 +1230,11 @@ Create deeper, sharper second-layer creator directions.
                   </p>
 
                   <h3 className="mt-4 text-3xl font-black leading-tight text-white">
-                    Your free creator session is complete.
+                    {copy.upgradeTitle}
                   </h3>
 
                   <p className="mt-5 text-sm leading-8 text-white/60">
-                    Premium unlocks unlimited generation, deeper creator systems,
-                    cinematic expansion, and advanced audience retention tools.
+                    {copy.upgradeBody}
                   </p>
 
                   <div className="mt-7 flex flex-wrap gap-3">
@@ -980,14 +1242,14 @@ Create deeper, sharper second-layer creator directions.
                       onClick={() => router.push("/pricing")}
                       className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-3 text-sm font-black text-black hover:scale-[1.02]"
                     >
-                      Continue With Premium
+                      {copy.continuePremium}
                     </button>
 
                     <button
                       onClick={() => setUpgradeNotice(false)}
                       className="rounded-[1rem] border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white/65 hover:border-yellow-400/30 hover:text-yellow-200"
                     >
-                      Stay in Studio
+                      {copy.stayStudio}
                     </button>
                   </div>
                 </div>
@@ -1011,7 +1273,7 @@ Create deeper, sharper second-layer creator directions.
                   disabled={loading || !idea.trim()}
                   className="rounded-[1rem] border border-yellow-400/50 bg-black/30 px-6 py-3 text-sm font-semibold text-white shadow-[0_0_30px_rgba(245,183,44,0.12)] transition-all hover:scale-[1.02] hover:bg-yellow-400 hover:text-black disabled:opacity-40"
                 >
-                  {loading ? "Generating..." : "Generate ✨"}
+                  {loading ? copy.generating : copy.generate}
                 </button>
               </div>
 
@@ -1029,7 +1291,7 @@ Create deeper, sharper second-layer creator directions.
                           ? "#"
                           : "✦"}
                     </span>
-                    {tool}
+                    {copy.toolLabels[tool as keyof typeof copy.toolLabels] || tool}
                     {tool === "Thumbnails" && (
                       <span className="ml-2 rounded-full bg-yellow-400/15 px-2 py-1 text-[9px] uppercase text-yellow-300">
                         New
@@ -1043,14 +1305,14 @@ Create deeper, sharper second-layer creator directions.
             <section className="mt-7 rounded-[1.6rem] border border-white/10 bg-white/[0.025] p-5">
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-300">
-                  Elite Creator Tools
+                  {copy.eliteCreatorTools}
                 </p>
 
                 <button
                   onClick={() => router.push("/premium-tools")}
                   className="text-sm text-yellow-300 hover:text-yellow-200"
                 >
-                  View All Tools →
+                  {copy.viewAllTools}
                 </button>
               </div>
 
@@ -1063,10 +1325,10 @@ Create deeper, sharper second-layer creator directions.
                   >
                     <div className="text-2xl text-yellow-300">{tool.icon}</div>
                     <h3 className="mt-4 text-lg font-semibold text-white">
-                      {tool.title}
+                      {copy.toolLabels[tool.title as keyof typeof copy.toolLabels] || tool.title}
                     </h3>
                     <p className="mt-3 text-sm leading-6 text-white/50">
-                      {tool.desc}
+                      {copy.toolDescriptions[tool.title as keyof typeof copy.toolDescriptions] || tool.desc}
                     </p>
                     <span className="mt-5 inline-flex rounded-full bg-yellow-400/12 px-3 py-1 text-xs text-yellow-300">
                       {isPremiumUser ? tool.tag : "Locked"}
@@ -1085,10 +1347,10 @@ Create deeper, sharper second-layer creator directions.
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-300">
-                      Generated Output
+                      {copy.generatedOutput}
                     </p>
                     <p className="mt-2 text-sm text-white/45">
-                      Copy, save, or unfold deeper directions.
+                      {copy.generatedOutputSub}
                     </p>
                   </div>
 
@@ -1097,7 +1359,7 @@ Create deeper, sharper second-layer creator directions.
                     disabled={expanding}
                     className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm text-white/65 transition-all hover:border-yellow-400/30 hover:text-yellow-200 disabled:opacity-40"
                   >
-                    {expanding ? "Unfolding..." : "Push Further →"}
+                    {expanding ? copy.unfolding : copy.pushFurther}
                   </button>
                 </div>
 
@@ -1151,7 +1413,7 @@ Create deeper, sharper second-layer creator directions.
                 {expanded.length > 0 && (
                   <div className="mt-8 space-y-4">
                     <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-300">
-                      Deeper Directions
+                      {copy.deeperDirections}
                     </p>
 
                     {expanded.map((item, index) => (
