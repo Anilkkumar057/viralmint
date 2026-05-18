@@ -101,55 +101,58 @@ const toolCards: ToolCard[] = [
 const UI_TEXT = {
   English: {
     welcomeBack: "Welcome back,",
-    creatorWorkspaceReady: "{copy.creatorWorkspaceReady}",
-    premiumCreatorEngine: "{copy.premiumCreatorEngine}",
-    premiumTools: "{copy.premiumTools}",
+    creatorWorkspaceReady: "Your Creator Workspace is ready.",
+    premiumCreatorEngine: "Premium Creator Engine",
+    premiumTools: "Premium Tools",
     unlimitedPowerPrefix: "Unlimited Power for",
-    creators: "{copy.creators}",
+    creators: "Creators",
     premiumDescription:
       "Generate hooks, captions, scripts, hashtags, thumbnails, repurpose packs, emotional CTAs, and creator growth systems from one cinematic studio.",
-    openPremiumTools: "Open {copy.premiumTools} ›",
-    unlockPremium: copy.unlockPremium,
-    howItWorks: "{copy.howItWorks}",
-    freeActive: "{copy.freeActive}",
-    savedVault: "{copy.savedVault}",
-    noSavedGenerations: "{copy.noSavedGenerations}",
-    close: "{copy.close}",
-    creatorWorkspace: "{copy.creatorWorkspace}",
-    createToday: "{copy.createToday}",
-    creativeFlow: "{copy.creativeFlow}",
+    openPremiumTools: "Open Premium Tools ›",
+    unlockPremium: "Unlock Premium ›",
+    howItWorks: "How It Works ▷",
+    freeActive: "Free Active",
+    savedVault: "Saved Vault",
+    noSavedGenerations: "No saved generations yet.",
+    close: "Close",
+    creatorWorkspace: "Creator Workspace",
+    createToday: "What do you want to create today?",
+    creativeFlow: "Creative Flow",
     freeTrial: "Free Trial",
     unlimited: "Unlimited",
     day: "Day",
-    upgradeTitle: "{copy.upgradeTitle}",
+    upgradeTitle: "Your free creator session is complete.",
     upgradeBody:
       "Premium unlocks unlimited generation, deeper creator systems, cinematic expansion, and advanced audience retention tools.",
-    continuePremium: "{copy.continuePremium}",
-    stayStudio: "{copy.stayStudio}",
+    continuePremium: "Continue With Premium",
+    stayStudio: "Stay in Studio",
     ideaPlaceholder: 'Type your idea... (e.g. "Viral hook about never giving up")',
     generating: "Generating...",
     generate: "Generate ✨",
-    eliteCreatorTools: "{copy.eliteCreatorTools}",
-    viewAllTools: "{copy.viewAllTools}",
-    generatedOutput: "{copy.generatedOutput}",
-    generatedOutputSub: "{copy.generatedOutputSub}",
+    eliteCreatorTools: "Elite Creator Tools",
+    viewAllTools: "View All Tools →",
+    generatedOutput: "Generated Output",
+    generatedOutputSub: "Copy, save, or unfold deeper directions.",
     unfolding: "Unfolding...",
     pushFurther: "Push Further →",
-    deeperDirections: "{copy.deeperDirections}",
+    deeperDirections: "Deeper Directions",
     copy: "Copy",
     copied: "Copied",
     save: "Save",
-    languageLabel: "{copy.languageLabel}",
-    profileDna: "{copy.profileDna}",
-    billing: "{copy.billing}",
-    logout: "{copy.logout}",
+    languageLabel: "🌐 Language / भाषा",
+    profileDna: "♙ Profile DNA",
+    billing: "▤ Billing",
+    logout: "↪ Logout",
     dna: "DNA",
     vault: "Vault",
     pricing: "Pricing",
-    helpSupport: "{copy.helpSupport}",
+    helpSupport: "? Help & Support",
     openTools: "Open Tools",
     upgrade: "Upgrade",
+    selected: "Selected",
+    locked: "Locked",
     toolLabels: {
+      "Studio": "Studio",
       "Hook Generator": "Hook Generator",
       "Viral Title": "Viral Title",
       "Script Engine": "Script Engine",
@@ -157,7 +160,7 @@ const UI_TEXT = {
       "Hashtag Finder": "Hashtag Finder",
       "Repurpose Pack": "Repurpose Pack",
       "Emotion Map": "Emotion Map",
-      "{copy.premiumTools}": "{copy.premiumTools}",
+      "Premium Tools": "Premium Tools",
       "Growth Map": "Growth Map",
       "Analytics": "Analytics",
       "Audience": "Audience",
@@ -166,6 +169,7 @@ const UI_TEXT = {
       "Vault": "Vault",
       "Pricing": "Pricing",
       "Logout": "Logout",
+      "Push Further": "Push Further",
     },
     toolDescriptions: {
       "Hook Generator": "Create scroll-stopping hooks instantly.",
@@ -227,7 +231,10 @@ const UI_TEXT = {
     helpSupport: "? सहायता",
     openTools: "टूल्स खोलें",
     upgrade: "अपग्रेड",
+    selected: "चयनित",
+    locked: "लॉक",
     toolLabels: {
+      "Studio": "स्टूडियो",
       "Hook Generator": "हुक जनरेटर",
       "Viral Title": "वायरल टाइटल",
       "Script Engine": "स्क्रिप्ट इंजन",
@@ -235,7 +242,7 @@ const UI_TEXT = {
       "Hashtag Finder": "हैशटैग फाइंडर",
       "Repurpose Pack": "री-पर्पज़ पैक",
       "Emotion Map": "इमोशन मैप",
-      "{copy.premiumTools}": "प्रीमियम टूल्स",
+      "Premium Tools": "प्रीमियम टूल्स",
       "Growth Map": "ग्रोथ मैप",
       "Analytics": "एनालिटिक्स",
       "Audience": "ऑडियंस",
@@ -244,6 +251,7 @@ const UI_TEXT = {
       "Vault": "वॉल्ट",
       "Pricing": "प्राइसिंग",
       "Logout": "लॉगआउट",
+      "Push Further": "और आगे बढ़ाएं",
     },
     toolDescriptions: {
       "Hook Generator": "तुरंत ध्यान खींचने वाले हुक बनाएं।",
@@ -257,23 +265,23 @@ const UI_TEXT = {
   },
   Hinglish: {
     welcomeBack: "Welcome back,",
-    creatorWorkspaceReady: "Tumhara {copy.creatorWorkspace} ready hai.",
-    premiumCreatorEngine: "{copy.premiumCreatorEngine}",
-    premiumTools: "{copy.premiumTools}",
+    creatorWorkspaceReady: "Tumhara Creator Workspace ready hai.",
+    premiumCreatorEngine: "Premium Creator Engine",
+    premiumTools: "Premium Tools",
     unlimitedPowerPrefix: "Unlimited Power",
-    creators: "{copy.creators} ke liye",
+    creators: "Creators ke liye",
     premiumDescription:
       "Hooks, captions, scripts, hashtags, thumbnails, repurpose packs, emotional CTAs aur creator growth systems ek cinematic studio me banao.",
-    openPremiumTools: "{copy.premiumTools} Kholो ›",
+    openPremiumTools: "Premium Tools Kholो ›",
     unlockPremium: "Premium Unlock Karo ›",
     howItWorks: "Kaise Kaam Karta Hai ▷",
-    freeActive: "{copy.freeActive}",
-    savedVault: "{copy.savedVault}",
+    freeActive: "Free Active",
+    savedVault: "Saved Vault",
     noSavedGenerations: "Abhi koi saved generation nahi hai.",
-    close: "{copy.close}",
-    creatorWorkspace: "{copy.creatorWorkspace}",
+    close: "Close",
+    creatorWorkspace: "Creator Workspace",
     createToday: "Aaj kya create karna hai?",
-    creativeFlow: "{copy.creativeFlow}",
+    creativeFlow: "Creative Flow",
     freeTrial: "Free Trial",
     unlimited: "Unlimited",
     day: "Day",
@@ -285,27 +293,30 @@ const UI_TEXT = {
     ideaPlaceholder: 'Apna idea likho... jaise "Never give up par viral hook"',
     generating: "Generate ho raha hai...",
     generate: "Generate Karo ✨",
-    eliteCreatorTools: "{copy.eliteCreatorTools}",
+    eliteCreatorTools: "Elite Creator Tools",
     viewAllTools: "Saare Tools Dekho →",
-    generatedOutput: "{copy.generatedOutput}",
+    generatedOutput: "Generated Output",
     generatedOutputSub: "Copy karo, save karo, ya aur deeper unfold karo.",
     unfolding: "Unfold ho raha hai...",
     pushFurther: "Push Further →",
-    deeperDirections: "{copy.deeperDirections}",
+    deeperDirections: "Deeper Directions",
     copy: "Copy",
     copied: "Copied",
     save: "Save",
-    languageLabel: "{copy.languageLabel}",
-    profileDna: "{copy.profileDna}",
-    billing: "{copy.billing}",
-    logout: "{copy.logout}",
+    languageLabel: "🌐 Language / भाषा",
+    profileDna: "♙ Profile DNA",
+    billing: "▤ Billing",
+    logout: "↪ Logout",
     dna: "DNA",
     vault: "Vault",
     pricing: "Pricing",
-    helpSupport: "{copy.helpSupport}",
+    helpSupport: "? Help & Support",
     openTools: "Tools Kholो",
     upgrade: "Upgrade",
+    selected: "Selected",
+    locked: "Locked",
     toolLabels: {
+      "Studio": "Studio",
       "Hook Generator": "Hook Generator",
       "Viral Title": "Viral Title",
       "Script Engine": "Script Engine",
@@ -313,7 +324,7 @@ const UI_TEXT = {
       "Hashtag Finder": "Hashtag Finder",
       "Repurpose Pack": "Repurpose Pack",
       "Emotion Map": "Emotion Map",
-      "{copy.premiumTools}": "{copy.premiumTools}",
+      "Premium Tools": "Premium Tools",
       "Growth Map": "Growth Map",
       "Analytics": "Analytics",
       "Audience": "Audience",
@@ -322,6 +333,7 @@ const UI_TEXT = {
       "Vault": "Vault",
       "Pricing": "Pricing",
       "Logout": "Logout",
+      "Push Further": "Push Further",
     },
     toolDescriptions: {
       "Hook Generator": "Instant scroll-stopping hooks banao.",
@@ -985,7 +997,7 @@ Create deeper, sharper second-layer creator directions.
                 )}
 
                 <div className="hidden rounded-[1.2rem] border border-yellow-400/45 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-yellow-300 shadow-[0_0_35px_rgba(245,183,44,0.18)] md:block">
-                  ♕ {cleanPlan === "free" ? "{copy.freeActive}" : `${cleanPlan} Active`}
+                  ♕ {cleanPlan === "free" ? "Free Active" : `${cleanPlan} Active`}
                 </div>
 
                 <button
@@ -1133,7 +1145,7 @@ Create deeper, sharper second-layer creator directions.
                     }
                     className="rounded-[1rem] bg-gradient-to-r from-yellow-300 to-yellow-500 px-6 py-3 text-sm font-black text-black shadow-[0_18px_50px_rgba(245,183,44,0.24)] transition-all hover:scale-[1.02]"
                   >
-                    {isPremiumUser ? "Open {copy.premiumTools} ›" : copy.unlockPremium}
+                    {isPremiumUser ? "Open Premium Tools ›" : "Unlock Premium ›"}
                   </button>
 
                   <button
@@ -1146,7 +1158,7 @@ Create deeper, sharper second-layer creator directions.
               </div>
 
               <div className="absolute right-6 top-5 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.25em] text-yellow-300">
-                ♕ {cleanPlan === "free" ? "{copy.freeActive}" : `${cleanPlan} Active`}
+                ♕ {cleanPlan === "free" ? "Free Active" : `${cleanPlan} Active`}
               </div>
             </section>
 
