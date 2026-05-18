@@ -98,7 +98,7 @@ export default function StudioPage() {
               ["⚙", "Settings", false],
             ].map(([icon, label, active]) => (
               <button
-                key={label}
+                key={String(label)}
                 className={
                   active
                     ? "flex w-full items-center gap-3 rounded-[1.2rem] border border-yellow-400/45 bg-yellow-400/10 px-4 py-3 text-left text-sm font-semibold text-yellow-200 shadow-[0_0_30px_rgba(245,183,44,0.13)]"
